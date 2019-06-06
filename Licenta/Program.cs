@@ -34,23 +34,24 @@ namespace Music_Extract_Feature
             return (count * 1.0) / (duration * 1.0);
         }
 
-        static void Main(string[] args)
+        static void Main()
         {
+             // const string file = "music\\Afrojack - Unstoppable (Official Video).mp3";
              const string file = "music\\bells.wav";
              var watch = Stopwatch.StartNew();
 
-             var sound =  (WavSound) SoundReader.ReadFromFile(file);
+             var sound =  SoundReader.ReadFromFile(file);
              var ft = new Ft(sound);
              watch.Stop();
 
              var elapsedMs = watch.ElapsedMilliseconds;
              Console.WriteLine($"Time: {elapsedMs} ms");
-             Console.WriteLine($"ChunkId: {sound.ChunkId}");
+             /*Console.WriteLine($"ChunkId: {sound.ChunkId}");
              Console.WriteLine($"Format: {sound.Format}");
              Console.WriteLine($"SubChunk1Id: {sound.SubChunk1Id}");
-             Console.WriteLine($"SubChunk2Id: {sound.SubChunk2Id}");
+             Console.WriteLine($"SubChunk2Id: {sound.SubChunk2Id}");*/
 
-             Console.ReadKey();
+             Console.ReadKey(); 
         }
     }
 }

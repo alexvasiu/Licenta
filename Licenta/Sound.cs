@@ -5,7 +5,8 @@ namespace Music_Extract_Feature
     public interface Sound
     {
         SoundType Type { get; }
-        List<long> Data { get; set; }
+        List<double> Data { get; set; }
+        double GetChunkSize();
     }
 
     public enum SoundType
