@@ -42,8 +42,10 @@ namespace MusicIdentifierAPI
             }
             else
             {
+                var currentDirectory = Directory.GetCurrentDirectory();
                 var builder = new ConfigurationBuilder().SetBasePath(
-                        Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\..\MusicIdentifierAPI"))
+                        currentDirectory.Contains("MusicIdentifierAPI") ? currentDirectory
+                            : Path.Combine(currentDirectory, @"..\..\..\..\MusicIdentifierAPI"))
                     .AddJsonFile("appsettings.json");
                 var configuration = builder.Build();
                 var appSettingsSection = configuration.GetSection("AppSettings");
