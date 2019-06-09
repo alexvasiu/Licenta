@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Music_Extract_Feature
 {
-    public class WavSound : Sound
+    public class WavSound : ISound
     {
         public string ChunkId { get; set; }
         public uint ChunkSize { get; set; }
@@ -23,6 +23,9 @@ namespace Music_Extract_Feature
         public string SubChunk2Id { get; set; }
         public uint SubChunk2Size { get; set; }
         public List<double> Data { get; set; }
+        public List<byte> RawBinary { get; set; }
+        public double Duration { get; set; }
+
         public double GetChunkSize()
         {
             throw new System.NotImplementedException();
@@ -32,7 +35,8 @@ namespace Music_Extract_Feature
 
         public static WavSound GetWavSound(byte[] bytes)
         {
-            var sound = new WavSound();
+            var sound = new WavSound {RawBinary = bytes.ToList()};
+
             var currentIndex = 0;
             sound.ChunkId = Encoding.UTF8.GetString(bytes.Slice(currentIndex, 4));
             currentIndex += 4;
@@ -152,6 +156,7 @@ namespace Music_Extract_Feature
                 }
             }
 
+            sound.Duration = sound.ChunkSize * 1.0 / (sound.SampleRate * sound.NumChannels * sound.BitDepth / 8.0);
             return sound;
         }
     }

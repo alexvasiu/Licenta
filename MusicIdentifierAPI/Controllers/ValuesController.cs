@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MusicIdentifierAPI.Controllers
@@ -12,11 +8,10 @@ namespace MusicIdentifierAPI.Controllers
     public class ValuesController : ControllerBase
     {
         // GET api/values
-        [Authorize]
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
-            return new string[] { "value1", "value2" };
+            return new string[] { "Here is my MusicIdentifierAPI" };
         }
 
         // GET api/values/5

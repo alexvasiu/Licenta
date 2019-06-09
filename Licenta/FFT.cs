@@ -2,58 +2,26 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Music_Extract_Feature
 {
-    public class Ft
+    public class DataPoint
     {
-        private readonly Complex[] _x;                // storage for sample data
-        public Complex[][] Result;                // storage for FFT answer
-        
-        private static void Separate(ref Complex[] a, int m, int n)
-        {
-            var b = new Complex[(n - m) / 2];
-            
-            for (var i = 0; i < (n - m) / 2; i++)    // copy all odd elements to b
-                b[i] = a[m + i * 2 + 1];
-            for (var i = 0; i < (n - m) / 2; i++)    // copy all even elements to lower-half of a
-                a[m + i] = a[m + i * 2];
-            for (var i = 0; i < (n - m) / 2; i++)    // copy all odd (from b) to upper-half of a[]
-                a[m + i + (n - m) / 2] = b[i];
-        }
+        public List<int> Points { get; set; }
+        public long Hash { get; set; }
+        public double Time { get; set; }
+        public double Duration { get; set; }
+        public List<double> HighScores { get; set; }
+    }
 
-        private static void Fft2(ref Complex[] x, int m, int n)
-        {
-            if (n - m < 2) return;
-            Separate(ref x, m, n);     
-            Fft2(ref x, m, m + (n - m) / 2);
-            Fft2(ref x, m + (n - m) / 2, n);
-            for (var k = 0; k < (n - m) / 2; k++)
-            {
-                var e = x[m + k];
-                var o = x[m + k + (n - m) / 2];                                                     
-                var w = Complex.Exp(new Complex(0, -2 * Math.PI * k / (n - m)));
-                x[m + k] = e + w * o;
-                x[m + k + (n - m) / 2] = e - w * o;
-            }
-        }
+    public class Fft
+    {
+        //public Complex[][] Result;                // storage for FFT answer
+        public List<DataPoint> Result;
 
-        private static double Signal(long t)
-        {
-            return new double[] { 2, 5, 11, 17, 29 }.Sum(x => 2 * Math.PI * x * t); // know freq sum
-        }
+        private static readonly int[] _range = { 40, 80, 120, 180, 300 };
 
-        /*private void Fill(IReadOnlyList<long> list)
-        {
-            for (var i = 0; i < list.Count; i++)
-                Result[i] = _x[i] = Signal(list[i]);
-        }*/
-
-        private readonly int[] _range = { 40, 80, 120, 180, 300 };
-
-        private int GetIndex(int freq)
+        private static int GetIndex(int freq)
         {
             var i = 0;
             while (i < _range.Length && _range[i] < freq)
@@ -61,18 +29,18 @@ namespace Music_Extract_Feature
             return i;
         }
 
-        private const int FuzFactor = 2;
-
+        private const int FUZ_FACTOR = 2;
         private static long Hash(long p1, long p2, long p3, long p4)
         {
-            return (p4 - p4 % FuzFactor) * 100000000 + (p3 - p3 % FuzFactor)
-                   * 100000 + (p2 - p2 % FuzFactor) * 100
-                   + (p1 - p1 % FuzFactor);
+            return (p4 - p4 % FUZ_FACTOR) * 100000000 + (p3 - p3 % FUZ_FACTOR)
+                   * 100000 + (p2 - p2 % FUZ_FACTOR) * 100
+                   + (p1 - p1 % FUZ_FACTOR);
         }
 
-        public Ft(Sound sound)
+        public static Fft CalculateFft(ISound sound)
         {
-            
+            var res = new Fft {Result = new List<DataPoint>()};
+
             var list = sound.Data;
             var totalSize = list.Count;
             const int chunkSize = 4000;
@@ -83,56 +51,45 @@ namespace Music_Extract_Feature
                 result[i] = new Complex[chunkSize];
                 for (var j = 0; j < chunkSize; j++)
                     result[i][j] = new Complex(list[i * chunkSize + j], 0);
-                result[i] = OtherFft(result[i]);
+                result[i] = CalculateFft(result[i]);
             }
 
-            var highscores = new double[result.Length, _range.Length];
-            var points = new int[result.Length, _range.Length];
-            var dict = new Dictionary<long, int>();
+            var timeForChunk = sound.Duration / result.Length;
+
             for (var i = 0; i < result.Length; i++)
             {
-                for (var freq = 40; freq < 300; freq++)
+                var points = Enumerable.Repeat(0, _range.Length).ToList();
+                var highScores = Enumerable.Repeat(0.0, _range.Length).ToList();
+
+                for (var freq = 30; freq < 300; freq++)
                 {
-                    // Get the magnitude:
                     var mag = Math.Log(result[i][freq].Magnitude + 1);
-
-                    // Find out which range we are in:
                     var index = GetIndex(freq);
-
-                    // Save the highest magnitude and corresponding frequency:
-                    if (mag > highscores[i, index])
-                    {
-                        points[i, index] = freq;
-                        highscores[i, index] = mag;
-                    }
+                    if (!(mag > highScores[index])) continue;
+                    points[index] = freq;
+                    highScores[index] = mag;
                 }
 
-                // form hash tag
-                var h = Hash(points[i, 0], points[i, 1], points[i, 2], points[i, 3]);
-                if (h == 0) continue;   
-                if (dict.ContainsKey(h))
-                    dict[h]++;
-                else
-                    dict[h] = 1;
+                res.Result.Add(new DataPoint
+                {
+                    Hash = Hash(points[0], points[1], points[2], points[3]),
+                    Points = points,
+                    Time = timeForChunk * i,
+                    Duration = timeForChunk,
+                    HighScores = highScores
+                });
             }
 
-            foreach (var (key, value) in dict)
-            {
-                Console.WriteLine($"{key} - {value}");
-            }
-
-            Result = result;
+            return res;
         }
 
         // TODO: ASSURE THAT MP3 IS PARSED CORRECTLY
 
         // TODO: UI: Login
 
-        private static Complex[] OtherFft(IReadOnlyList<Complex> data)
+        private static Complex[] CalculateFft(IReadOnlyList<Complex> data)
         {
             var n = data.Count;
-            /*if (n < 2)
-                return data.ToArray();*/
 
             var even = new Complex[n / 2];
             var odd = new Complex[n / 2];
@@ -142,8 +99,8 @@ namespace Music_Extract_Feature
                 odd[i] = data[2 * i + 1];
             }
 
-            var evenResult = n / 2 > 1 ? OtherFft(even) : even;
-            var oddResult = n / 2 > 1 ? OtherFft(odd) : odd;
+            var evenResult = n / 2 > 1 ? CalculateFft(even) : even;
+            var oddResult = n / 2 > 1 ? CalculateFft(odd) : odd;
 
             var finalResult = new Complex[n];
             for (var i = 0; i < n / 2; i++)

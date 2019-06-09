@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using MusicIdentifierAPI.Domain;
 
-namespace MusicIdentifierAPI.Domain
+namespace MusicIdentifierAPI.Models
 {
-    public class Song
+    public class SongInfoModel
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -15,16 +16,6 @@ namespace MusicIdentifierAPI.Domain
         public string SpotifyLink { get; set; }
         public string BeatPortLink { get; set; }
         public double Duration { get; set; }
-        public List<byte> Picture { get; set; }
-        public List<SongPart> SongParts { get; set; }
-        public List<Playlist> Playlists { get; set; }
-
-        public Song()
-        {
-            SongParts = new List<SongPart>();
-            Picture = new List<byte>();
-            Playlists = new List<Playlist>();
-        }
-
+        public byte[] Picture { get; set; }
     }
 }

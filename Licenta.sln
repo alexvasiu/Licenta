@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.28917.181
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Feature Extraction", "Licenta\Feature Extraction.csproj", "{BFB0C1DD-3153-4473-A301-EF76E47D0EA8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicIdentifierAPI", "MusicIdentifierAPI\MusicIdentifierAPI.csproj", "{6E3190E3-8306-4EFA-8EFD-7A78F7BA6037}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MusicIdentifierAPI", "MusicIdentifierAPI\MusicIdentifierAPI.csproj", "{6E3190E3-8306-4EFA-8EFD-7A78F7BA6037}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PopulateDatabase", "PopulateDatabase\PopulateDatabase.csproj", "{0C15E33A-B739-407E-953E-7ED5BAF5B4D2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{6E3190E3-8306-4EFA-8EFD-7A78F7BA6037}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6E3190E3-8306-4EFA-8EFD-7A78F7BA6037}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6E3190E3-8306-4EFA-8EFD-7A78F7BA6037}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C15E33A-B739-407E-953E-7ED5BAF5B4D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C15E33A-B739-407E-953E-7ED5BAF5B4D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C15E33A-B739-407E-953E-7ED5BAF5B4D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C15E33A-B739-407E-953E-7ED5BAF5B4D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

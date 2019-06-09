@@ -2,13 +2,14 @@
 
 namespace Music_Extract_Feature
 {
-    public interface Sound
+    public interface ISound
     {
         SoundType Type { get; }
         List<double> Data { get; set; }
+        List<byte> RawBinary { get; set; }
+        double Duration { get; set; }
         double GetChunkSize();
     }
-
     public enum SoundType
     {
         Wav,

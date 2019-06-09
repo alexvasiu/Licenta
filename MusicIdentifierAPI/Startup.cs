@@ -24,15 +24,14 @@ namespace MusicIdentifierAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<DatabaseContext>(options => options.UseNpgsql("Host=localhost;Database=MusicIdentifierDB;Username=postgres;Password=admin"));
-
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
-
             services.AddDataProtection();
+            var appSettings = appSettingsSection.Get<AppSettings>();
+
+            services.AddDbContext<DatabaseContext>(options => options.UseNpgsql(appSettings.ConnectionString));
 
             // configure jwt authentication
-            var appSettings = appSettingsSection.Get<AppSettings>();
             var key = Encoding.ASCII.GetBytes(appSettings.Secret);
             services.AddAuthentication(x =>
                 {
@@ -55,6 +54,8 @@ namespace MusicIdentifierAPI
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddCors();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ISongService, SongService>();
+            services.AddScoped<DbContext, DatabaseContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

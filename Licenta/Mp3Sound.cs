@@ -2,10 +2,13 @@
 
 namespace Music_Extract_Feature
 {
-    public class Mp3Sound : Sound
+    public class Mp3Sound : ISound
     {
         public SoundType Type { get; } = SoundType.Mp3;
         public List<double> Data { get; set; }
+        public List<byte> RawBinary { get; set; }
+        public double Duration { get; set; }
+
         public double GetChunkSize()
         {
             throw new System.NotImplementedException();

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MusicIdentifierAPI;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -10,9 +11,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MusicIdentifierAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20190606170326_AddUserType")]
+    partial class AddUserType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,9 +55,9 @@ namespace MusicIdentifierAPI.Migrations
 
                     b.Property<string>("Artist");
 
-                    b.Property<string>("BeatPortLink");
+                    b.Property<int>("Duration");
 
-                    b.Property<double>("Duration");
+                    b.Property<List<byte>>("FileData");
 
                     b.Property<string>("Genre");
 
@@ -79,13 +81,7 @@ namespace MusicIdentifierAPI.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<double>("Duration");
-
                     b.Property<string>("Hashtag");
-
-                    b.Property<List<double>>("HighScores");
-
-                    b.Property<List<int>>("Points");
 
                     b.Property<int>("SongId");
 
@@ -93,11 +89,7 @@ namespace MusicIdentifierAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Points");
-
                     b.HasIndex("SongId");
-
-                    b.HasIndex("Points", "Time");
 
                     b.ToTable("SongPart");
                 });

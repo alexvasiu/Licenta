@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
 
 namespace Music_Extract_Feature
 {
@@ -157,6 +159,11 @@ namespace Music_Extract_Feature
                 default:
                     throw new Exception("Invalid type");
             }
+        }
+
+        public static byte[] GetBytes(this IFormFile file)
+        {
+            return new BinaryReader(file.OpenReadStream()).ReadBytes((int)file.OpenReadStream().Length);
         }
     }
 }
