@@ -10,8 +10,8 @@ import {
     AsyncStorage
 } from 'react-native';
 import { MusicStoreContext } from './Context/Context';
-import { UserService } from './Users/UserService';
-import { User } from './Users/User';
+// import { UserService } from './Users/UserService';
+// import { User } from './Users/User';
 import NavigationService from '../../NavigationService';
 
 interface Props {

@@ -1,4 +1,6 @@
-﻿namespace MusicIdentifierAPI.Models
+﻿using MusicIdentifierAPI.Domain;
+
+namespace MusicIdentifierAPI.Models
 {
     public class UserModel
     {
@@ -9,5 +11,6 @@
         public string RefreshToken { get; set; }
         public string FacebookId { get; set; }
         public string GoogleId { get; set; }
+        public UserType UserType { get; set; }
     }
 }

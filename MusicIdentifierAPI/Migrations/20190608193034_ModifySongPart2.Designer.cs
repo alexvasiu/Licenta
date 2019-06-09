@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MusicIdentifierAPI;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -10,9 +11,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MusicIdentifierAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20190608193034_ModifySongPart2")]
+    partial class ModifySongPart2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,6 +59,8 @@ namespace MusicIdentifierAPI.Migrations
 
                     b.Property<double>("Duration");
 
+                    b.Property<List<byte>>("FileData");
+
                     b.Property<string>("Genre");
 
                     b.Property<int>("IdentificationCounter");
@@ -93,11 +97,7 @@ namespace MusicIdentifierAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Points");
-
                     b.HasIndex("SongId");
-
-                    b.HasIndex("Points", "Time");
 
                     b.ToTable("SongPart");
                 });

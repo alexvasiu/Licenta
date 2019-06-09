@@ -15,9 +15,17 @@ namespace MusicIdentifierAPI.Domain
         [DefaultValue(null)]
         public string GoogleId { get; set; }
         public List<Playlist> Playlists { get; set; }
+        [DefaultValue(UserType.Normal)]
+        public UserType UserType { get; set; }
         public User()
         {
             Playlists = new List<Playlist>();
         }
+    }
+
+    public enum UserType
+    {
+        Normal,
+        Admin
     }
 }

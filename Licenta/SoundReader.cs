@@ -11,7 +11,20 @@ namespace Music_Extract_Feature
         private static readonly List<string> AcceptedFormats = new List<string> { ".wav", ".mp3" };
         private SoundReader() { }
 
-        public static Sound ReadFromFile(string path)
+        public static ISound ReadFromData(byte[] data, SoundType soundType)
+        {
+            switch (soundType)
+            {
+                case SoundType.Wav:
+                    return WavSound.GetWavSound(data);
+                case SoundType.Mp3:
+                    return null;
+                default:
+                    return null;
+            }
+        }
+
+        public static ISound ReadFromFile(string path)
         {
             if (!File.Exists(path))
                 throw new FileNotFoundException($@"{path}: No such file or Directory");

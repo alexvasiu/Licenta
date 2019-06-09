@@ -12,7 +12,8 @@ namespace MusicIdentifierAPI.Mappers
             Username = user.Username,
             RefreshToken = user.RefreshToken,
             FacebookId = user.FacebookId,
-            GoogleId = user.GoogleId
+            GoogleId = user.GoogleId,
+            UserType = user.UserType
         };
 
 
@@ -22,7 +23,8 @@ namespace MusicIdentifierAPI.Mappers
             Email = userRegisterModel.Email,
             Password = userRegisterModel.Password,
             FacebookId = userRegisterModel.FacebookId,
-            GoogleId = userRegisterModel.GoogleId
+            GoogleId = userRegisterModel.GoogleId,
+            UserType = UserType.Normal
         };
     }
 }
