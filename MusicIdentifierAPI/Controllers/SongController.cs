@@ -1,9 +1,8 @@
-﻿using System.IO;
+﻿using System;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Music_Extract_Feature;
-using MusicIdentifierAPI.Domain;
 using MusicIdentifierAPI.Models;
 using MusicIdentifierAPI.Services;
 
@@ -21,8 +20,20 @@ namespace MusicIdentifierAPI.Controllers
         }
 
         [HttpPost]
-        [Route("api/song/analyze")]
-        public ActionResult<SongInfoModel> SongAnalyze(IFormFile file)
+        [Route("analyzeData")]
+        public ActionResult<SongInfoModel> SongAnalyze([FromBody] File file)
+        {
+            if (file.ContentType != "audio/wav" && file.ContentType != "audio/wave")
+                return BadRequest();
+            var song = _songService.AnalyzeAudioFile(Convert.FromBase64String(file.Content));
+            if (song == null)
+                return NotFound("Song not found");
+            return song;
+        }
+
+        [HttpPost]
+        [Route("analyze")]
+        public ActionResult<SongInfoModel> SongAnalyze([FromForm] IFormFile file)
         {
             if (file.ContentType != "audio/wav" && file.ContentType != "audio/wave" || file.Length < 1)
                 return BadRequest();
@@ -31,5 +42,10 @@ namespace MusicIdentifierAPI.Controllers
                 return NotFound("Song not found");
             return song;
         }
+    }
+    public class File
+    {
+        public string Content { get; set; }
+        public string ContentType { get; set; }
     }
 }

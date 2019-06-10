@@ -6,7 +6,8 @@ import {
     View,
     TextInput,
     TouchableOpacity,
-    ToastAndroid
+    ToastAndroid,
+    ActivityIndicator
 } from 'react-native';
 import { MusicStoreContext } from './Context/Context';
 import { UserService } from './Users/UserService';
@@ -20,6 +21,7 @@ interface Props {
 interface States {
     username: string;
     password: string;
+    loading: boolean;
 }
 
 export class Login extends Component < Props,
@@ -29,15 +31,15 @@ States > {
         super(props);
         this.state = {
             username: '',
-            password: ''
+            password: '',
+            loading: false
         }
         this.redirect = this.redirect.bind(this);
     }
     
     componentDidMount()
     {
-        if (this.context.user != null)
-            this.redirect("MainApp");
+        
     }
 
     redirect(path: string) {
@@ -50,11 +52,6 @@ States > {
         return (
             <MusicStoreContext.Consumer>
                 {(data: any) =>
-                    data.user != null ?
-                    <View>
-                        {this.redirect("MainApp")}
-                    </View>
-                    :
                     <View style={styles.container}>
                         <TextInput
                             style={styles.input}
@@ -78,12 +75,15 @@ States > {
                         <TouchableOpacity
                             style={styles.buttonContainer}
                             onPress={() => {
+                                this.setState({loading: true})
                                 UserService.login(this.state.username, this.state.password).then((user: User) => {
                                     data.login(user);
                                     AsyncStorageUtis.setItem('user', JSON.stringify(user)).then(() => {
+                                        this.setState({loading: false})
                                         this.redirect('MainApp');
                                     })
                                 }, () => {
+                                    this.setState({loading: false})
                                     ToastAndroid.show("Wrong Username/Password", ToastAndroid.LONG);
                                 })
                         }}>
@@ -111,6 +111,10 @@ States > {
                                 onPress=
                                 {() => { this.redirect("Register") }}>Register</Text>
                         </View>
+
+                        {
+                            this.state.loading ? <ActivityIndicator size="large" color="#0000ff" /> : null
+                        }
                     </View> }
             </MusicStoreContext.Consumer>
         )

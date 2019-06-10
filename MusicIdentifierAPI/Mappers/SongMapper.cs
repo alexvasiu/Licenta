@@ -15,7 +15,7 @@ namespace MusicIdentifierAPI.Mappers
             Genre = song.Genre,
             IdentificationCounter = song.IdentificationCounter,
             Name = song.Name,
-            Picture = song.Picture.ToArray(),
+            Picture = song.Picture?.ToArray(),
             SpotifyLink = song.SpotifyLink,
             YoutubeLink = song.YoutubeLink,
             BeatPortLink = song.BeatPortLink

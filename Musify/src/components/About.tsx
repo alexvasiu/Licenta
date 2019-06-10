@@ -9,7 +9,7 @@ export class About extends React.Component {
             justifyContent: 'center',
             alignItems: 'center'
         }}>
-            <Text>Music Identifier v1.0</Text>
+            <Text>Musify v1.0</Text>
         </View>
        )
     }

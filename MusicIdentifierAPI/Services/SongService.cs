@@ -17,11 +17,9 @@ namespace MusicIdentifierAPI.Services
     public class SongService : ISongService
     {
         private readonly AppSettings _appSettings;
-        private readonly IDataProtector _dataProtector;
 
-        public SongService(IOptions<AppSettings> appSettings, IDataProtectionProvider provider)
+        public SongService(IOptions<AppSettings> appSettings)
         {
-            _dataProtector = provider.CreateProtector("Data protector");
             _appSettings = appSettings.Value;
         }
 
@@ -39,14 +37,19 @@ namespace MusicIdentifierAPI.Services
             for (var i1 = 0; i1 < resultFft.Result.Count; i1++)
                 for (var i2 = i1 + 1; i2 < resultFft.Result.Count; i2++)
                 {
-                    var all1 = allParts.Where(x => x.Points == resultFft.Result[i1].Points).ToList();
+                    // var all1 = allParts.Where(x => x.Points == resultFft.Result[i1].Points).ToList();
+                    var all1 = allParts.Where(x => x.Hashtag == resultFft.Result[i1].Hash.ToString()).ToList();
 
                     foreach (var res in all1)
                     {
-                        if (allParts.Any(x => res.SongId == x.SongId &&
+                        /*if (allParts.Any(x => res.SongId == x.SongId &&
                                               Math.Abs(Math.Abs(resultFft.Result[i1].Time -
                                                                 resultFft.Result[i2].Time) - Math.Abs(res.Time - x.Time)) < 0.001 
-                                              && x.Points == resultFft.Result[i2].Points))
+                                              && x.Points == resultFft.Result[i2].Points))*/
+                        if (allParts.Any(x => res.SongId == x.SongId &&
+                                              Math.Abs(Math.Abs(resultFft.Result[i1].Time -
+                                                                resultFft.Result[i2].Time) - Math.Abs(res.Time - x.Time)) < 0.001
+                                              && x.Hashtag == resultFft.Result[i2].Hash.ToString()))
                             return SongMapper.MapSong(songRepo.Find(res.SongId));
                     }
                 }

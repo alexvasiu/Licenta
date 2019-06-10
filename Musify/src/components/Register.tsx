@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ToastAndroid, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ToastAndroid, StyleSheet, ActivityIndicator } from 'react-native';
 import { UserService } from './Users/UserService';
 import { User } from './Users/User';
 import NavigationService from '../../NavigationService';
@@ -12,16 +12,18 @@ interface States {
     email: string;
     password1: string;
     password2: string;
+    loading: boolean;
 }
 
 export class Register extends Component<Props, States> {
     constructor(props: Props) {
         super(props);
         this.state = {
-            username: '',
-            email: '',
-            password1: '',
-            password2: ''
+            username: 'avasiu',
+            email: 'test',
+            password1: 'zanamea',
+            password2: 'zanamea',
+            loading: false
         }
     }
 
@@ -74,21 +76,30 @@ export class Register extends Component<Props, States> {
                     else if (this.state.password1 != this.state.password2)
                         ToastAndroid.show("Passwords should be the same", ToastAndroid.LONG);
                     else
-                        UserService.register({
+                        {
+                            this.setState({loading: true})
+                            UserService.register({
                             username: this.state.username,
                             email: this.state.email,
                             password: this.state.password1,
                             facebookId: "",
                             googleId: ""
                         }).then((user: User) => {
+                            this.setState({loading: false})
                             ToastAndroid.show("User " + this.state.username + " was created.", ToastAndroid.LONG);
                             NavigationService.navigate('Login', {});
                         }, (error: any) => {
+                            this.setState({loading: false})
                             ToastAndroid.show(error, ToastAndroid.LONG);
                         })
+                    }
             }}>
                 <Text style={styles.buttonText}>REGISTER</Text>
             </TouchableOpacity>
+             
+            {
+                this.state.loading ? <ActivityIndicator size="large" color="#0000ff" /> : null
+            }
         </View>)
     }
 }

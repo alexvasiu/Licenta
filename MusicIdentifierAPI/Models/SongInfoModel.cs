@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using MusicIdentifierAPI.Domain;
 
 namespace MusicIdentifierAPI.Models
 {

@@ -1,6 +1,11 @@
-﻿using System.Text;
+﻿using System;
+using System.IO;
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
+using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +31,6 @@ namespace MusicIdentifierAPI
         {
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
-            services.AddDataProtection();
             var appSettings = appSettingsSection.Get<AppSettings>();
 
             services.AddDbContext<DatabaseContext>(options => options.UseNpgsql(appSettings.ConnectionString));

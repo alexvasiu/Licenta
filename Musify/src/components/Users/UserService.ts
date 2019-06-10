@@ -38,6 +38,9 @@ export class UserService {
             }, (error) => {
                 reject(error)
             })
+            .catch((error) => {
+                reject(error)
+            })
         })
     }
 }

@@ -3,13 +3,13 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MusicIdentifierAPI.Domain;
 using MusicIdentifierAPI.Mappers;
 using MusicIdentifierAPI.Models;
 using MusicIdentifierAPI.Repository;
+using MusicIdentifierAPI.Utils;
 
 namespace MusicIdentifierAPI.Services
 {
@@ -22,11 +22,9 @@ namespace MusicIdentifierAPI.Services
     public class UserService : IUserService
     {
         private readonly AppSettings _appSettings;
-        private readonly IDataProtector _dataProtector;
 
-        public UserService(IOptions<AppSettings> appSettings, IDataProtectionProvider provider)
+        public UserService(IOptions<AppSettings> appSettings)
         {
-            _dataProtector = provider.CreateProtector("Password protector");
             _appSettings = appSettings.Value;
         }
 
@@ -34,8 +32,9 @@ namespace MusicIdentifierAPI.Services
         {
             using var unitOfWork = new UnitOfWork();
             var userRepo = unitOfWork.GetRepository<User>();
+            userLoginModel.Password = StringCipher.Encrypt(userLoginModel.Password, "KI6rnfCy6YUFq0mLoO");
             var user = userRepo.FirstOrDefault(x =>
-                x.Username == userLoginModel.Username && _dataProtector.Unprotect(x.Password) == userLoginModel.Password);
+                x.Username == userLoginModel.Username && x.Password == userLoginModel.Password);
             if (user == null)
                 return null;
             // authentication successful so generate jwt token
@@ -124,7 +123,7 @@ namespace MusicIdentifierAPI.Services
             if (userRepo.FirstOrDefault(x => x.Email == user.Email) != null)
                 throw new Exception("Email already exists");
             user.RefreshToken = GenerateRefreshToken();
-            user.Password = _dataProtector.Protect(user.Password);
+            user.Password = StringCipher.Encrypt(user.Password, "KI6rnfCy6YUFq0mLoO");
             userRepo.Add(user);
             unitOfWork.Save(); ;
             return UserMapper.MapUser(user);

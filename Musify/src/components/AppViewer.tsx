@@ -7,9 +7,11 @@ import React from 'react';
 import NavigationService from '../../NavigationService';
 import { Register } from './Register';
 import { MainView } from './MainApp/MainView';
+import { UserInfo } from './Users/UserInfo';
 
-const MainApp = createBottomTabNavigator({
+export const MainApp = createBottomTabNavigator({
   "Search for Song": MainView,
+  Account: UserInfo,
   About: About
 },
 {
@@ -50,7 +52,7 @@ class MainComponent extends React.Component {
   }
 }
 
-const AppViewer = createStackNavigator({
+const AppViewer = (initialScreen: string = "Login") => createStackNavigator({
   Login: {
     screen: Login,
     navigationOptions: {
@@ -67,7 +69,7 @@ const AppViewer = createStackNavigator({
     screen: MainApp,
     navigationOptions: {
       headerLeft: null,
-      title: 'Music Store',
+      title: 'Musify',
       headerStyle: {
         backgroundColor: '#f4511e'
       },
@@ -78,7 +80,7 @@ const AppViewer = createStackNavigator({
     }
   }
 }, {
-  initialRouteName: 'Login'
+  initialRouteName: initialScreen
 });
 
 export default AppViewer;
