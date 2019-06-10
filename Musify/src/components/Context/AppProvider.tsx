@@ -1,6 +1,7 @@
 import React from "react";
-import { AsyncStorage, NetInfo } from "react-native"
 import { MusicStoreContext } from "./Context";
+import NetInfo from "@react-native-community/netinfo";
+import { AsyncStorageUtis } from "../AsnyStorageUtils";
 
 interface Props {
 }
@@ -9,6 +10,7 @@ interface States {
     user?: any;
     network: any;
     serverConnection: any;
+    unsubscribe: any;
 }
 
 export class AppProvider extends React.Component<Props, States> {
@@ -18,29 +20,28 @@ export class AppProvider extends React.Component<Props, States> {
         this.state = {
             user: null,
             network: null,
-            serverConnection: null
+            serverConnection: null,
+            unsubscribe: null
         }
     }
 
     componentDidMount() {
         if (this.state.user == null)
-            AsyncStorage.getItem("user").then((data) => {
+            AsyncStorageUtis.getItem("user").then((data) => {
                 if (data != null)
-                    this.setState({user: JSON.parse(data)})
-            },
-            () => {})
+                 this.setState({user: JSON.parse(data)})
+            }, () => {})
         let me = this;
-        NetInfo.getConnectionInfo().then((connectionInfo) => {
-            let connected = connectionInfo.type != 'none' && connectionInfo.type != 'unknown';
+        NetInfo.fetch().then((state) => {
+            let connected = state.type != 'none' && state.type != 'unknown';
             let serverConnection = me.state.serverConnection;
             if (!connected)
                 serverConnection = false;
             me.setState({network: connected, serverConnection: serverConnection})
         });
-        NetInfo.addEventListener(
-            'connectionChange',
-            (connectionInfo : any) => me.handleConnectivityChange(connectionInfo, me)
-          );
+        this.setState({unsubscribe: NetInfo.addEventListener(state => {
+            me.handleConnectivityChange(state, me)
+        })})
     }
     
     handleConnectivityChange(connectionInfo : any, me: any) {
@@ -52,8 +53,8 @@ export class AppProvider extends React.Component<Props, States> {
     }
 
     logout() {
-        this.setState({user: null})
-        AsyncStorage.removeItem("user").then(() => {
+        AsyncStorageUtis.removeItem("user").then(() => {
+            this.setState({user: null})
         })
     }
 
@@ -68,5 +69,10 @@ export class AppProvider extends React.Component<Props, States> {
         return (<MusicStoreContext.Provider value={data as any}>
                 {this.props.children}
         </MusicStoreContext.Provider>)
+    }
+
+    componentWillUnmount()
+    {
+        this.state.unsubscribe();
     }
 }

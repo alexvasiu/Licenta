@@ -6,13 +6,13 @@ import {
     View,
     TextInput,
     TouchableOpacity,
-    ToastAndroid,
-    AsyncStorage
+    ToastAndroid
 } from 'react-native';
 import { MusicStoreContext } from './Context/Context';
-// import { UserService } from './Users/UserService';
-// import { User } from './Users/User';
+import { UserService } from './Users/UserService';
+import { User } from './Users/User';
 import NavigationService from '../../NavigationService';
+import { AsyncStorageUtis } from './AsnyStorageUtils';
 
 interface Props {
 }
@@ -28,10 +28,16 @@ States > {
     {
         super(props);
         this.state = {
-            username: 'avasiu',
-            password: 'test'
+            username: '',
+            password: ''
         }
         this.redirect = this.redirect.bind(this);
+    }
+    
+    componentDidMount()
+    {
+        if (this.context.user != null)
+            this.redirect("MainApp");
     }
 
     redirect(path: string) {
@@ -44,7 +50,11 @@ States > {
         return (
             <MusicStoreContext.Consumer>
                 {(data: any) =>
-                    data.user == null ?
+                    data.user != null ?
+                    <View>
+                        {this.redirect("MainApp")}
+                    </View>
+                    :
                     <View style={styles.container}>
                         <TextInput
                             style={styles.input}
@@ -68,15 +78,14 @@ States > {
                         <TouchableOpacity
                             style={styles.buttonContainer}
                             onPress={() => {
-                                this.redirect('MainApp');
-                                /*UserService.login(this.state.username, this.state.password).then((user: User) => {
+                                UserService.login(this.state.username, this.state.password).then((user: User) => {
                                     data.login(user);
-                                    AsyncStorage.setItem('user', JSON.stringify(user)).then(() => {
+                                    AsyncStorageUtis.setItem('user', JSON.stringify(user)).then(() => {
                                         this.redirect('MainApp');
                                     })
                                 }, () => {
                                     ToastAndroid.show("Wrong Username/Password", ToastAndroid.LONG);
-                                })*/
+                                })
                         }}>
                             <Text style={styles.buttonText}>LOGIN</Text>
                         </TouchableOpacity>
@@ -102,13 +111,13 @@ States > {
                                 onPress=
                                 {() => { this.redirect("Register") }}>Register</Text>
                         </View>
-                    </View> : <View>
-                        {this.redirect("Songs")}
                     </View> }
             </MusicStoreContext.Consumer>
         )
     }
 }
+
+Login.contextType = MusicStoreContext;
 
 const styles = StyleSheet.create({
     container: {

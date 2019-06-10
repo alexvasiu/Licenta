@@ -1,8 +1,8 @@
-import { User } from "./User";
+import { User, UserForRegister } from "./User";
 import {BASE_URL} from './../AppResource';
 
 export class UserService {
-    public static register(user: any): Promise<User> {
+    public static register(user: UserForRegister): Promise<User> {
         return new Promise((resolve, reject) => {
             fetch(this.URL + "register", {
                 method: 'POST',

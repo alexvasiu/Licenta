@@ -5,8 +5,11 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import React from 'react';
 import NavigationService from '../../NavigationService';
+import { Register } from './Register';
+import { MainView } from './MainApp/MainView';
 
 const MainApp = createBottomTabNavigator({
+  "Search for Song": MainView,
   About: About
 },
 {
@@ -15,17 +18,12 @@ const MainApp = createBottomTabNavigator({
       const { routeName } = navigation.state;
       let IconComponent = Ionicons;
       let iconName;
-      if (routeName === 'Songs') {
-        iconName = `ios-musical-notes`;
-        // Sometimes we want to add badges to some icons. 
-        // You can check the implementation below.
-        // IconComponent = HomeIconWithBadge; 
-      } else if (routeName === 'Account') {
+      if (routeName === 'Search for Song')
+        iconName = `ios-search`;
+      else if (routeName === 'Account')
         iconName = `ios-person`;
-      }
-      else if (routeName == "About") {
+      else if (routeName == "About")
         iconName = `ios-information-circle`;
-      }
       else if (routeName == "Genre Chart") {
         iconName = `pie-chart`;
         IconComponent = FontAwesome;
@@ -59,12 +57,12 @@ const AppViewer = createStackNavigator({
       header: null
     }
   },
-//   Register : {
-//     screen: Register,
-//     navigationOptions: {
-//       header: null
-//     }
-//   },
+  Register : {
+    screen: Register,
+    navigationOptions: {
+      header: null
+    }
+  },
   MainApp: {
     screen: MainApp,
     navigationOptions: {
