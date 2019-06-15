@@ -14,7 +14,7 @@ steps:
   displayName: 'Display work Directory'
 - script: docker login -u $(dockerId) -p $(pswd)
   displayName: 'Docker Login'
-- script: docker build -t $(appName).azurecr.io/$(imageName) Dockerfile
+- script: docker build -t $(appName).azurecr.io/$(imageName) .
   displayName: 'Build Docker Image'
 - script: docker push $(appName).azurecr.io/$(imageName)
 
