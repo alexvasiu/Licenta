@@ -43,7 +43,7 @@ export class MainView extends Component<Props, States> {
             sampleRate: 44100,  // default 44100
             channels: 2,        // 1 or 2, default 1
             bitsPerSample: 16,  // 8 or 16, default 16
-            audioSource: 1,     // android only (see below)
+            audioSource: 6,     // android only (see below)
             wavFile: 'test.wav' // default 'audio.wav'
           };
 
