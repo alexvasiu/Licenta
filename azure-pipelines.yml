@@ -12,6 +12,6 @@ pool:
 steps:
 - script: ls -lah
   displayName: 'Display work Directory'
-- script: cd MusicIdentifierAPI && docker build
+- script: docker build
   displayName: 'Build Docker Image'
 
