@@ -10,8 +10,8 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- script: cd MusicIdentifierAPI
-  displayName: 'Enter in API Directory'
-- script: docker build
+- script: ls -lah
+  displayName: 'Display work Directory'
+- script: cd MusicIdentifierAPI && docker build
   displayName: 'Build Docker Image'
 
