@@ -12,6 +12,6 @@ pool:
 steps:
 - script: ls -lah
   displayName: 'Display work Directory'
-- script: docker build
+- script: docker build Dockerfile
   displayName: 'Build Docker Image'
 
