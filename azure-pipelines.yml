@@ -18,7 +18,8 @@ steps:
   displayName: 'Build Docker Image'
 - script: docker login -u musifyAPI -p $(docker_azure_pswd) $(appName).azurecr.io
   displayName: 'Login into container'
-- script: docker push $(appName).azurecr.io/$(imageName):latest
+- script: docker tag latest $(appName).azurecr.io/$(imageName)
+- script: docker push $(appName).azurecr.io/$(imageName)
   displayName: 'Push into container'
 
 - task: AzureRmWebAppDeployment@4
