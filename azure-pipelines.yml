@@ -18,7 +18,8 @@ steps:
   displayName: 'Build Docker Image'
 - script: docker login -u musifyAPI -p $(docker_azure_pswd) $(appName).azurecr.io
   displayName: 'Login into container'
-- script: docker tag latest $(appName).azurecr.io/$(imageName)
+- script: docker tag musify $(appName).azurecr.io/$(imageName)
+  displayName: 'Tag the image'
 - script: docker push $(appName).azurecr.io/$(imageName)
   displayName: 'Push into container'
 
