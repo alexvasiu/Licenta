@@ -14,10 +14,18 @@ steps:
   displayName: 'Display work Directory'
 - script: docker login -u $(dockerId) -p $(pswd)
   displayName: 'Docker Login'
-- script: docker build -t $(appName).azurecr.io/$(imageName) .
+- script: docker build -t $(appName)
   displayName: 'Build Docker Image'
 - script: docker login -u musifyAPI -p $(docker_azure_pswd) $(appName).azurecr.io
   displayName: 'Login into container'
 - script: docker push $(appName).azurecr.io/$(imageName)
   displayName: 'Push into container'
 
+- task: AzureRmWebAppDeployment@4
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'Azure for Students(6a9d28ef-5870-414e-be65-1f76ca521543)'
+    appType: 'webAppContainer'
+    WebAppName: 'musifyAPIWeb'
+    DockerNamespace: ''
+    DockerRepository: $(appName).azurecr.io/$(imageName) .
