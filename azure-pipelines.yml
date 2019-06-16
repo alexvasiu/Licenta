@@ -18,8 +18,6 @@ steps:
   displayName: 'Build Docker Image'
 - script: docker login -u musifyAPI -p $(docker_azure_pswd) $(appName).azurecr.io
   displayName: 'Login into container'
-# - script: docker tag musify $(appName).azurecr.io/$(imageName)
-#   displayName: 'Tag the image'
 - script: docker push $(appName).azurecr.io/$(imageName)
   displayName: 'Push into container'
 
@@ -29,5 +27,5 @@ steps:
     azureSubscription: 'Azure for Students(6a9d28ef-5870-414e-be65-1f76ca521543)'
     appType: 'webAppContainer'
     WebAppName: 'musifyAPIWeb'
-    DockerNamespace: ''
-    DockerRepository: $(appName).azurecr.io/$(imageName) .
+    DockerNamespace: '$(appName).azurecr.io/$(imageName):latest'
+    DockerRepository: '$(appName).azurecr.io/$(imageName):latest'
