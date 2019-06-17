@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MusicIdentifierAPI.Domain;
@@ -23,7 +25,7 @@ namespace MusicIdentifierAPI
         public DbSet<Song> Song { get; set; }
         public DbSet<SongPart> SongPart { get; set; }
         public DbSet<Playlist> Playlist { get; set; }
-
+        public DbSet<SongPlaylist> SongPlaylist { get; set; }
         protected override void OnModelCreating(ModelBuilder model)
         {
             model.Entity<SongPart>()

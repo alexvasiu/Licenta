@@ -91,6 +91,22 @@ namespace PopulateDatabase
                 Console.WriteLine($"Progress: {percent}%");
             }
 
+            Console.WriteLine("Creating dictionary ...");
+            using var unitOfWork = new UnitOfWork();
+            var songPartsRepo = unitOfWork.GetRepository<SongPart>();
+            var allParts = songPartsRepo.GetAll();
+
+            var dict = new SortedDictionary<string, SortedList<double, SongPart>>();
+            foreach (var songPart in allParts)
+            {
+                if (dict.ContainsKey(songPart.Hashtag))
+                    dict[songPart.Hashtag].Add(songPart.Time, songPart);
+                else
+                    dict[songPart.Hashtag] = new SortedList<double, SongPart> { { songPart.Time, songPart } };
+            }
+
+            MusicIdentifierAPI.Utils.Utils.WriteToBinaryFile(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\..\MusicIdentifierAPI\songdict"), dict);
+
             Console.WriteLine("Done :)");
             Console.ReadKey();
         }

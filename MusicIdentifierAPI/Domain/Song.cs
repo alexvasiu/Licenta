@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace MusicIdentifierAPI.Domain
 {
+    [Serializable]
     public class Song
     {
         public int Id { get; set; }
@@ -17,14 +18,13 @@ namespace MusicIdentifierAPI.Domain
         public double Duration { get; set; }
         public List<byte> Picture { get; set; }
         public List<SongPart> SongParts { get; set; }
-        public List<Playlist> Playlists { get; set; }
+        public List<SongPlaylist> Playlists { get; set; }
 
         public Song()
         {
             SongParts = new List<SongPart>();
             Picture = new List<byte>();
-            Playlists = new List<Playlist>();
+            Playlists = new List<SongPlaylist>();
         }
-
     }
 }

@@ -19,17 +19,17 @@ namespace Music_Extract_Feature
         //public Complex[][] Result;                // storage for FFT answer
         public List<DataPoint> Result;
 
-        private static readonly int[] _range = { 40, 80, 120, 180, 300 };
+        private static readonly int[] Range = { 40, 80, 120, 180, 300 };
 
         private static int GetIndex(int freq)
         {
             var i = 0;
-            while (i < _range.Length && _range[i] < freq)
+            while (i < Range.Length && Range[i] < freq)
                 i++;
             return i;
         }
 
-        private const int FUZ_FACTOR = 2;
+        private const int FUZ_FACTOR = 5; // CHANGE IT
         private static long Hash(long p1, long p2, long p3, long p4)
         {
             return (p4 - p4 % FUZ_FACTOR) * 100000000 + (p3 - p3 % FUZ_FACTOR)
@@ -58,8 +58,8 @@ namespace Music_Extract_Feature
 
             for (var i = 0; i < result.Length; i++)
             {
-                var points = Enumerable.Repeat(0, _range.Length).ToList();
-                var highScores = Enumerable.Repeat(0.0, _range.Length).ToList();
+                var points = Enumerable.Repeat(0, Range.Length).ToList();
+                var highScores = Enumerable.Repeat(0.0, Range.Length).ToList();
 
                 for (var freq = 30; freq < 300; freq++)
                 {
