@@ -1,13 +1,12 @@
 ﻿using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
+using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MusicIdentifierAPI.Domain;
 
 namespace MusicIdentifierAPI
 {
-    public class DatabaseContext : DbContext
+    public class DatabaseContext : DbContextWithTriggers
     {
         public IConfiguration Configuration { get; }
 

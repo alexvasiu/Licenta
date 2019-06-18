@@ -71,6 +71,7 @@ namespace PopulateDatabase
                 })
             );
             unitOfWork.Save();
+            unitOfWork.Dispose();
         }
         
         private static void Main(string[] args)
@@ -91,7 +92,7 @@ namespace PopulateDatabase
                 Console.WriteLine($"Progress: {percent}%");
             }
 
-            Console.WriteLine("Creating dictionary ...");
+            /*Console.WriteLine("Creating dictionary ...");
             using var unitOfWork = new UnitOfWork();
             var songPartsRepo = unitOfWork.GetRepository<SongPart>();
             var allParts = songPartsRepo.GetAll();
@@ -105,7 +106,7 @@ namespace PopulateDatabase
                     dict[songPart.Hashtag] = new SortedList<double, SongPart> { { songPart.Time, songPart } };
             }
 
-            MusicIdentifierAPI.Utils.Utils.WriteToBinaryFile(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\..\MusicIdentifierAPI\songdict"), dict);
+            MusicIdentifierAPI.Utils.Utils.WriteToBinaryFile(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\..\MusicIdentifierAPI\songdict"), dict);*/
 
             Console.WriteLine("Done :)");
             Console.ReadKey();

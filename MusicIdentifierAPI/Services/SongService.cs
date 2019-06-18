@@ -32,7 +32,7 @@ namespace MusicIdentifierAPI.Services
             var songRepo = unitOfWork.GetRepository<Song>();
 
             var dict =
-                Utils.Utils.ReadFromBinaryFile<SortedDictionary<string, SortedList<double, SongPart>>>("songDict");
+                Utils.Utils.ReadFromBinaryFile<SortedDictionary<string, SortedList<int, SongPart>>>("songDict");
 
             var sound = SoundReader.ReadFromData(data, SoundType.Wav);
             var resultFft = Fft.CalculateFft(sound);
@@ -44,12 +44,12 @@ namespace MusicIdentifierAPI.Services
                     var hash2 = resultFft.Result[i2].Hash.ToString();
                     if (!dict.ContainsKey(hash1) || !dict.ContainsKey(hash2)) continue;
                     var all1 = dict[hash1];
-                    foreach (var (key, value) in all1)
+                    foreach (var (_, value) in all1)
                     {
                         if (!dict[hash2].Any(x => value.SongId == x.Value.SongId &&
                                                   Math.Abs(Math.Abs(resultFft.Result[i1].Time -
                                                                     resultFft.Result[i2].Time) -
-                                                           Math.Abs(key - x.Key)) <
+                                                           Math.Abs(value.Time - x.Value.Time)) <
                                                   0.001)) continue;
                         var song = songRepo.Find(value.SongId);
                         song.IdentificationCounter += 1;

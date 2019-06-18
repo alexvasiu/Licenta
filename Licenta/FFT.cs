@@ -29,7 +29,7 @@ namespace Music_Extract_Feature
             return i;
         }
 
-        private const int FUZ_FACTOR = 5; // CHANGE IT
+        private const int FUZ_FACTOR = 2;
         private static long Hash(long p1, long p2, long p3, long p4)
         {
             return (p4 - p4 % FUZ_FACTOR) * 100000000 + (p3 - p3 % FUZ_FACTOR)

@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using EntityFrameworkCore.Triggers;
+using System.Linq;
 
 namespace MusicIdentifierAPI.Domain
 {
@@ -25,6 +28,32 @@ namespace MusicIdentifierAPI.Domain
             SongParts = new List<SongPart>();
             Picture = new List<byte>();
             Playlists = new List<SongPlaylist>();
+        }
+
+        static Song()
+        {
+            Triggers<Song>.Inserted += songObj =>
+            {
+                var song = songObj.Entity;
+                if (song.SongParts == null) return;
+                var currentDirectory = Directory.GetCurrentDirectory();
+                var finalPath =
+                    currentDirectory.Contains("MusicIdentifierAPI")
+                        ? "songDict"
+                        : Path.GetFullPath(Path.Combine(currentDirectory, @"..\..\..\..\MusicIdentifierAPI\songDict"));
+                var dict =
+                    Utils.Utils.ReadFromBinaryFile<SortedDictionary<string, SortedDictionary<int, SongPart>>>(finalPath) ??
+                    new SortedDictionary<string, SortedDictionary<int, SongPart>>();
+                foreach (var songPart in song.SongParts)
+                {
+                    if (songPart.Hashtag == "0") continue;
+                    if (dict.ContainsKey(songPart.Hashtag))
+                        dict[songPart.Hashtag].Add(songPart.Id, songPart);
+                    else
+                        dict[songPart.Hashtag] = new SortedDictionary<int, SongPart> { { songPart.Id, songPart } };
+                }
+                Utils.Utils.WriteToBinaryFile(finalPath, dict);
+            };
         }
     }
 }

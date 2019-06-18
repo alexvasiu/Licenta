@@ -1,5 +1,8 @@
-﻿namespace MusicIdentifierAPI.Domain
+﻿using System;
+
+namespace MusicIdentifierAPI.Domain
 {
+    [Serializable]
     public class SongPlaylist
     {
         public int Id { get; set; }
