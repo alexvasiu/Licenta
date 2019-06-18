@@ -4,6 +4,7 @@ WORKDIR /MusicIdentifierAPI
 # Copy csproj and restore as distinct layers
 COPY *.sln .
 COPY MusicIdentifierAPI/*.csproj ./MusicIdentifierAPI/
+COPY UnitTesting/*.csproj ./UnitTesting/
 COPY Licenta/*.csproj ./Licenta/
 COPY PopulateDatabase/*.csproj ./PopulateDatabase/
 RUN dotnet restore Licenta.sln
