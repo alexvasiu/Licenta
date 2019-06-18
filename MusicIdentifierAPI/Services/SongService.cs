@@ -32,7 +32,10 @@ namespace MusicIdentifierAPI.Services
             var songRepo = unitOfWork.GetRepository<Song>();
 
             var dict =
-                Utils.Utils.ReadFromBinaryFile<SortedDictionary<string, SortedList<int, SongPart>>>("songDict");
+                Utils.Utils.ReadFromBinaryFile<SortedDictionary<string, SortedDictionary<int, SongPart>>>("songDict");
+
+            if (dict == null)
+                return null;
 
             var sound = SoundReader.ReadFromData(data, SoundType.Wav);
             var resultFft = Fft.CalculateFft(sound);
