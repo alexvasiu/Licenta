@@ -13,7 +13,7 @@ namespace UnitTesting
         {
             var musicPath = Path.GetFullPath(
                 Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\bells.wav"));
-            var wavSound = (WavSound) SoundReader.ReadFromFile(musicPath);
+            var wavSound = (WavSound) SoundReader.ReadFromFile(@"C:\Users\Ale\Downloads\genres\blues\blues.00000.wav");
             Assert.IsNotNull(wavSound);
             Assert.AreEqual(16, wavSound.BitDepth);
             Assert.AreEqual(2, wavSound.NumChannels);

@@ -31,13 +31,13 @@ namespace MusicIdentifierAPI.Services
             using var unitOfWork = new UnitOfWork();
             var songRepo = unitOfWork.GetRepository<Song>();
 
-            var dict =
-                Utils.Utils.ReadFromBinaryFile<SortedDictionary<string, SortedDictionary<int, SongPart>>>("songDict");
+            /*var dict =
+                Utils.Utils.ReadFromBinaryFile<SortedDictionary<string, SortedDictionary<int, SongPart>>>("songDict");*/
 
-            if (dict == null)
-            {
+            /*if (dict == null)
+            {*/
                 var songPartRepo = unitOfWork.GetRepository<SongPart>();
-                dict = new SortedDictionary<string, SortedDictionary<int, SongPart>>();
+                var dict = new SortedDictionary<string, SortedDictionary<int, SongPart>>();
                 foreach (var songPart in songPartRepo.GetAll())
                 {
                     if (songPart.Hashtag == "0") continue;
@@ -47,7 +47,7 @@ namespace MusicIdentifierAPI.Services
                         dict[songPart.Hashtag] = new SortedDictionary<int, SongPart> { { songPart.Id, songPart } };
                 }
                 Utils.Utils.WriteToBinaryFile("songDict", dict);
-            }
+            //}
 
             var sound = SoundReader.ReadFromData(data, SoundType.Wav);
             var resultFft = Fft.CalculateFft(sound);
