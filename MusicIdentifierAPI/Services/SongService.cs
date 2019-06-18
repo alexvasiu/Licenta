@@ -35,7 +35,19 @@ namespace MusicIdentifierAPI.Services
                 Utils.Utils.ReadFromBinaryFile<SortedDictionary<string, SortedDictionary<int, SongPart>>>("songDict");
 
             if (dict == null)
-                return null;
+            {
+                var songPartRepo = unitOfWork.GetRepository<SongPart>();
+                dict = new SortedDictionary<string, SortedDictionary<int, SongPart>>();
+                foreach (var songPart in songPartRepo.GetAll())
+                {
+                    if (songPart.Hashtag == "0") continue;
+                    if (dict.ContainsKey(songPart.Hashtag))
+                        dict[songPart.Hashtag].Add(songPart.Id, songPart);
+                    else
+                        dict[songPart.Hashtag] = new SortedDictionary<int, SongPart> { { songPart.Id, songPart } };
+                }
+                Utils.Utils.WriteToBinaryFile("songDict", dict);
+            }
 
             var sound = SoundReader.ReadFromData(data, SoundType.Wav);
             var resultFft = Fft.CalculateFft(sound);
