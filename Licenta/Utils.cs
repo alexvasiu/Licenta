@@ -16,7 +16,7 @@ namespace Music_Extract_Feature
             if (fill == -1) return newArray;
             {
                 for (var i = start + length; i < array.Length && i < start + fill; i++)
-                    newArray[i - start] = default(T);
+                    newArray[i - start] = default;
             }
             return newArray;
         }
@@ -79,6 +79,8 @@ namespace Music_Extract_Feature
 
         public static short GetShort(this byte[] bytes, bool bigEndian = false)
         {
+            if (bytes.Length == 1)
+                return bigEndian ? (short) (bytes[0] << 8) : bytes[0];
             return bigEndian
                 ? (short)((bytes[0] << 8) | bytes[1])
                 : (short)((bytes[1] << 8) | bytes[0]);
@@ -119,17 +121,34 @@ namespace Music_Extract_Feature
             return true;
         }
 
-        public static List<byte[]> Group(this byte[] bytes, int groupSize)
+        public static List<T[]> Group<T>(this T[] bytes, int groupSize)
         {
             if ((groupSize & (groupSize - 1)) != 0)
                 throw new Exception("Invalid group size");
-            if (bytes.Length % groupSize != 0)
-                throw new Exception("Invalid length");
-            var result = new List<byte[]>();
+            /*if (bytes.Length % groupSize != 0)
+                throw new Exception("Invalid length");*/
+            var result = new List<T[]>();
             for (var i = 0; i < bytes.Length; i += groupSize)
             {
-                var cur = new List<byte>();
-                for (var j = 0; j < groupSize; j++)
+                var cur = new List<T>();
+                for (var j = 0; i + j < bytes.Length && j < groupSize; j++)
+                    cur.Add(bytes[i + j]);
+                result.Add(cur.ToArray());
+            }
+            return result;
+        }
+
+        public static List<T[]> Group<T>(this List<T> bytes, int groupSize)
+        {
+            if ((groupSize & (groupSize - 1)) != 0)
+                throw new Exception("Invalid group size");
+            /*if (bytes.Count % groupSize != 0)
+                throw new Exception("Invalid length");*/
+            var result = new List<T[]>();
+            for (var i = 0; i < bytes.Count; i += groupSize)
+            {
+                var cur = new List<T>();
+                for (var j = 0; i + j < bytes.Count && j < groupSize; j++)
                     cur.Add(bytes[i + j]);
                 result.Add(cur.ToArray());
             }

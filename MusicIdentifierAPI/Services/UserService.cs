@@ -18,6 +18,10 @@ namespace MusicIdentifierAPI.Services
         UserModel Login(UserLoginModel userLoginModel);
         UserModel Refresh(string token, string refreshToken);
         UserModel Register(UserRegisterModel model);
+        UserModel LoginFb(UserLoginFacebook userLoginFacebook);
+        UserModel LoginGoogle(UserLoginGoogle userLoginGoogle);
+        bool ChangePassword(UserChangePassword userChangePassword);
+        bool ChangeProfile(UserChangeProfile userChangeProfile);
     }
     public class UserService : IUserService
     {
@@ -26,6 +30,127 @@ namespace MusicIdentifierAPI.Services
         public UserService(IOptions<AppSettings> appSettings)
         {
             _appSettings = appSettings.Value;
+        }
+
+        public UserModel LoginFb(UserLoginFacebook userLoginFacebook)
+        {
+            using var unitOfWork = new UnitOfWork();
+            var userRepo = unitOfWork.GetRepository<User>();
+            var user = userRepo.FirstOrDefault(x => x.FacebookId == userLoginFacebook.FacebookId);
+            if (user == null)
+            {
+                user = new User
+                {
+                    Email = userLoginFacebook.Email,
+                    FacebookId = userLoginFacebook.FacebookId,
+                    GoogleId = null,
+                    UserType = UserType.Normal,
+                    Username = userLoginFacebook.Email,
+                    Password = StringCipher.Encrypt("", "KI6rnfCy6YUFq0mLoO")
+                };
+                userRepo.Add(user);
+                var playlistRepo = unitOfWork.GetRepository<Playlist>();
+                playlistRepo.Add(new Playlist
+                {
+                    Name = "Liked songs",
+                    Public = false,
+                    ShareLink = "",
+                    UserId = user.Id
+                });
+
+                unitOfWork.Save();
+            }
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.Name, user.Username)
+                }),
+                Expires = DateTime.UtcNow.AddMonths(1),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var userModel = UserMapper.MapUser(user);
+            userModel.Token = tokenHandler.WriteToken(token);
+            return userModel;
+        }
+
+        public UserModel LoginGoogle(UserLoginGoogle userLoginGoogle)
+        {
+            using var unitOfWork = new UnitOfWork();
+            var userRepo = unitOfWork.GetRepository<User>();
+            var user = userRepo.FirstOrDefault(x => x.GoogleId == userLoginGoogle.GoogleId);
+            if (user == null)
+            {
+                user = new User
+                {
+                    Email = userLoginGoogle.Email,
+                    FacebookId = userLoginGoogle.GoogleId,
+                    GoogleId = null,
+                    UserType = UserType.Normal,
+                    Username = userLoginGoogle.Email,
+                    Password = StringCipher.Encrypt("", "KI6rnfCy6YUFq0mLoO")
+                };
+                userRepo.Add(user);
+                var playlistRepo = unitOfWork.GetRepository<Playlist>();
+                playlistRepo.Add(new Playlist
+                {
+                    Name = "Liked songs",
+                    Public = false,
+                    ShareLink = "",
+                    UserId = user.Id
+                });
+
+                unitOfWork.Save();
+            }
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.Name, user.Username)
+                }),
+                Expires = DateTime.UtcNow.AddMonths(1),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var userModel = UserMapper.MapUser(user);
+            userModel.Token = tokenHandler.WriteToken(token);
+            return userModel;
+        }
+
+        public bool ChangePassword(UserChangePassword userChangePassword)
+        {
+            using var unitOfWork = new UnitOfWork();
+            var userRepo = unitOfWork.GetRepository<User>();
+            var user = userRepo.FirstOrDefault(x =>
+                x.Username == userChangePassword.Username);
+            if (user == null)
+                return false;
+            user.Password = userChangePassword.Password;
+            userRepo.Update(user);
+            unitOfWork.Save();
+            return true;
+        }
+
+        public bool ChangeProfile(UserChangeProfile userChangeProfile)
+        {
+            using var unitOfWork = new UnitOfWork();
+            var userRepo = unitOfWork.GetRepository<User>();
+            var user = userRepo.FirstOrDefault(x =>
+                x.Username == userChangeProfile.Username);
+            if (user == null)
+                return false;
+            user.FacebookId = userChangeProfile.FacebookId;
+            user.GoogleId = userChangeProfile.GoogleId;
+            user.Email = userChangeProfile.Email;
+            user.UserType = userChangeProfile.UserType;
+            userRepo.Update(user);
+            unitOfWork.Save();
+            return true;
         }
 
         public UserModel Login(UserLoginModel userLoginModel)
@@ -91,7 +216,7 @@ namespace MusicIdentifierAPI.Services
             var user = userRepo.FirstOrDefault(x => x.Username == username);
             if (user.RefreshToken != refreshToken)
                 throw new SecurityTokenException("Invalid refresh token");
-
+            
             user.RefreshToken = GenerateRefreshToken();
             userRepo.Update(user);
             unitOfWork.Save();
@@ -117,6 +242,7 @@ namespace MusicIdentifierAPI.Services
         {
             using var unitOfWork = new UnitOfWork();
             var userRepo = unitOfWork.GetRepository<User>();
+            var playlistRepo = unitOfWork.GetRepository<Playlist>();
             var user = UserMapper.MapRegisterModel(model);
             if (userRepo.FirstOrDefault(x => x.Username == user.Username) != null)
                 throw new Exception("Username already exists");
@@ -125,7 +251,15 @@ namespace MusicIdentifierAPI.Services
             user.RefreshToken = GenerateRefreshToken();
             user.Password = StringCipher.Encrypt(user.Password, "KI6rnfCy6YUFq0mLoO");
             userRepo.Add(user);
-            unitOfWork.Save(); ;
+            playlistRepo.Add(new Playlist
+            {
+                Name = "Liked songs",
+                Public = false,
+                ShareLink = "",
+                UserId = user.Id
+            });
+
+            unitOfWork.Save();
             return UserMapper.MapUser(user);
         }
     }

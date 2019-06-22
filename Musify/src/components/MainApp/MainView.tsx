@@ -1,16 +1,16 @@
 import React, { Component } from 'react';
 import { MusicStoreContext } from '../Context/Context';
-import { View, StyleSheet, Text, Image } from 'react-native';
+import { View, StyleSheet, Text, Image, Modal } from 'react-native';
 import AudioRecord from 'react-native-audio-record';
 import Permissions from 'react-native-permissions';
 import { SongService } from './SongService';
 import { Song } from './Song';
 import {Buffer} from 'buffer';
 import { Card, Button, Icon } from 'react-native-elements';
-
-var RNFS = require('react-native-fs');
+import { SongInfo } from './SongInfo';
 
 interface Props {
+    navigation: any;
 }
 
 interface States {
@@ -20,6 +20,7 @@ interface States {
     foundedSong?: Song;
     buttonEnabled: boolean;
     displaySong: boolean;
+    modalVisible: boolean;
 }
 
 export class MainView extends Component<Props, States> {
@@ -31,7 +32,8 @@ export class MainView extends Component<Props, States> {
             gifState: 0,
             foundedSong: undefined,
             buttonEnabled: true,
-            displaySong: false
+            displaySong: false,
+            modalVisible: false
         }
     }
 
@@ -40,8 +42,8 @@ export class MainView extends Component<Props, States> {
         await this.checkPermission();
 
         const options = {
-            sampleRate: 44100,  // default 44100
-            channels: 2,        // 1 or 2, default 1
+            sampleRate: 11025,  // default 44100
+            channels: 1,        // 1 or 2, default 1
             bitsPerSample: 16,  // 8 or 16, default 16
             audioSource: 6,     // android only (see below)
             wavFile: 'test.wav' // default 'audio.wav'
@@ -79,7 +81,13 @@ export class MainView extends Component<Props, States> {
                                 <React.Fragment>
                                     {this.state.foundedSong == undefined 
                                     || this.state.foundedSong == null
-                                     ? <Text style={{fontSize: 30, color: 'red'}}>No results found</Text> :
+                                     ?
+                                     <React.Fragment>
+                                        <Text style={{fontSize: 30, color: 'red'}}>No results found</Text>
+                                        <Button title="Classify Song" onPress={() => {
+
+                                        }}/>
+                                     </React.Fragment> :
                                 <Card
                                     containerStyle = {{width: '95%'}}
                                     title={this.state.foundedSong.name}
@@ -92,7 +100,10 @@ export class MainView extends Component<Props, States> {
                                     <Button
                                         icon={<Icon name='info' color='#ffffff' />}
                                         buttonStyle={{backgroundColor: '#03A9F4', borderRadius: 0, marginLeft: 0, marginRight: 0, marginBottom: 0}}
-                                        title='See more info' />
+                                        title='See more info'
+                                        onPress={() => {
+                                            this.setState({modalVisible: true})
+                                        }} />
                                 </Card>}
                                 </React.Fragment>
                                 : null
@@ -129,6 +140,21 @@ export class MainView extends Component<Props, States> {
                                         "Start Recording" : this.state.currState == 1 ? "Stop Recording" :
                                             "Search Song"} />
                         </View>
+                        <Modal
+                            animationType="slide"
+                            transparent={false}
+                            visible={this.state.modalVisible}
+                            onRequestClose={() => {
+                                this.setState({modalVisible: false})
+                            }}>
+                            <View style={{marginTop: 22}}>
+                                <View>
+                                    {this.state.foundedSong != undefined ?
+                                        <SongInfo song={this.state.foundedSong} /> 
+                                    : null}
+                                </View>
+                            </View>
+                        </Modal>
                     </View>
                 )}
             </MusicStoreContext.Consumer>

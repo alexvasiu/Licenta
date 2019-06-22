@@ -8,9 +8,11 @@ import NavigationService from '../../NavigationService';
 import { Register } from './Register';
 import { MainView } from './MainApp/MainView';
 import { UserInfo } from './Users/UserInfo';
+import { Playlists } from './MainApp/Playlists';
 
 export const MainApp = createBottomTabNavigator({
   "Search for Song": MainView,
+  Playlists: Playlists,
   Account: UserInfo,
   About: About
 },
@@ -26,6 +28,8 @@ export const MainApp = createBottomTabNavigator({
         iconName = `ios-person`;
       else if (routeName == "About")
         iconName = `ios-information-circle`;
+      else if (routeName == "Playlists")
+        iconName = `ios-musical-notes`;
       else if (routeName == "Genre Chart") {
         iconName = `pie-chart`;
         IconComponent = FontAwesome;

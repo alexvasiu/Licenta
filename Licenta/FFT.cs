@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using System.Text;
 
 namespace Music_Extract_Feature
 {
     public class DataPoint
     {
         public List<int> Points { get; set; }
-        public long Hash { get; set; }
+        public string Hash { get; set; }
         public double Time { get; set; }
         public double Duration { get; set; }
         public List<double> HighScores { get; set; }
@@ -19,7 +21,8 @@ namespace Music_Extract_Feature
         //public Complex[][] Result;                // storage for FFT answer
         public List<DataPoint> Result;
 
-        private static readonly int[] Range = { 40, 80, 120, 180, 300 };
+        // private static readonly int[] Range = { 40, 80, 120, 180, 300 }; UNDO
+        private static readonly int[] Range = { 10, 20, 40, 80, 160 };
 
         private static int GetIndex(int freq)
         {
@@ -37,15 +40,79 @@ namespace Music_Extract_Feature
                    + (p1 - p1 % FUZ_FACTOR);
         }
 
-        public static Fft CalculateFft(ISound sound)
+        private static void ConvertStereoToMono(ref ISound sound)
+        {
+            sound.NumChannels = 1;
+            var bytesPerSample = (ushort)(sound.BitDepth / 8);
+            if (bytesPerSample == 2)
+            {
+                sound.Data = sound.Data.Group(2).Select(x => (x[0] + x[1]) / 2.0).ToList();
+                //.Group(2).Select(x => (double) x.GetShort()).ToList();
+            }
+            else
+                throw new NotImplementedException();
+        }
+
+        private static void LowPassFilter(ref ISound sound)
+        {
+            var newResult = new double[sound.Data.Count];
+            newResult[0] = sound.Data[0];
+            for (var n = 1; n < sound.Data.Count; n++)
+                newResult[n] = sound.Data[n] + sound.Data[n - 1];
+            sound.Data = newResult.ToList();
+        }
+
+        private static void DownSampling(ref ISound sound)
+        {
+            sound.Data = sound.Data.Group(4).Select(x => x.Average()).ToList();
+            sound.SampleRate /= 4;
+        }
+
+        private static void HammingWindowFunction(ref ISound sound)
+        {
+            var length = sound.Data.Count;
+            for (var i = 0; i < length; i += 1024)
+            {
+                var m = i + 1024 <= length ? 1024 : length - i;
+                for (var n = 0; n < m; n++)
+                    sound.Data[n + i] = sound.Data[n + i] * (0.54 - 0.46 * 2 * Math.PI * n / (m - 1));
+            }
+              
+        }
+
+        private static string Hash(List<int> points)
+        {
+            if (points == null) throw new ArgumentNullException(nameof(points));
+            using var md5 = System.Security.Cryptography.MD5.Create();
+            return string.Concat(md5.ComputeHash(Encoding.ASCII.GetBytes(string.Join("-", points)))
+                .Select(x => x.ToString("x2")));
+        }
+
+        private static void Filter(ref List<int> points, ref List<double> highScores, double avg)
+        {
+            var list = highScores;
+            points = points.Where((x, index) => list[index] > avg).ToList();
+            highScores = highScores.Where((x, index) => x > avg).ToList();
+        }
+
+        public static Fft CalculateFft(ISound sound, bool isFromServer = true)
         {
             var res = new Fft {Result = new List<DataPoint>()};
+            if (isFromServer)
+            {
+                if (sound.NumChannels == 2)
+                    ConvertStereoToMono(ref sound);
+                LowPassFilter(ref sound);
+                DownSampling(ref sound);
+            }
+
+            HammingWindowFunction(ref sound);
 
             var list = sound.Data;
-            var totalSize = list.Count;
-            const int chunkSize = 4000;
-            var sampledChunkSize = totalSize / chunkSize;
+            var chunkSize = 1024;
+            var sampledChunkSize = list.Count / chunkSize;
             var result = new Complex[sampledChunkSize][];
+
             for (var i = 0; i < sampledChunkSize; i++)
             {
                 result[i] = new Complex[chunkSize];
@@ -56,28 +123,58 @@ namespace Music_Extract_Feature
 
             var timeForChunk = sound.Duration / result.Length;
 
+            var mean = 0.0;
+
+            var pointsGlobal = Enumerable.Repeat(0, Range.Length + 1).ToList();
+            var highScoresGlobal = Enumerable.Repeat(0.0, Range.Length + 1).ToList();
+
             for (var i = 0; i < result.Length; i++)
             {
-                var points = Enumerable.Repeat(0, Range.Length).ToList();
-                var highScores = Enumerable.Repeat(0.0, Range.Length).ToList();
+                var points = Enumerable.Repeat(0, Range.Length + 1).ToList();
+                var highScores = Enumerable.Repeat(0.0, Range.Length + 1).ToList();
 
-                for (var freq = 30; freq < 300; freq++)
+                for (var freq = 0; freq < 512; freq++)
                 {
                     var mag = Math.Log(result[i][freq].Magnitude + 1);
                     var index = GetIndex(freq);
-                    if (!(mag > highScores[index])) continue;
+
+                    if (mag >= highScoresGlobal[index])
+                    {
+                        highScoresGlobal[index] = mag;
+                        pointsGlobal[index] = freq;
+                    }
+
+                    if (!(mag >= highScores[index])) continue;
                     points[index] = freq;
                     highScores[index] = mag;
                 }
 
+                // var filteredPoints = Filter(points, highScores);
+
+                mean += highScores.Sum();
+
                 res.Result.Add(new DataPoint
                 {
-                    Hash = Hash(points[0], points[1], points[2], points[3]),
+                    Hash = Hash(points),
                     Points = points,
                     Time = timeForChunk * i,
                     Duration = timeForChunk,
                     HighScores = highScores
                 });
+            }
+
+            var avg = highScoresGlobal.Average();
+
+            for (var i = 0; i < res.Result.Count; i++)
+            {
+                var dataPoint = res.Result[i];
+                var aPoints = dataPoint.Points;
+                var aHighScores = dataPoint.HighScores;
+                Filter(ref aPoints, ref aHighScores, avg);
+                dataPoint.Points = aPoints;
+                dataPoint.HighScores = aHighScores;
+                dataPoint.Hash = Hash(aPoints);
+                res.Result[i] = dataPoint;
             }
 
             return res;

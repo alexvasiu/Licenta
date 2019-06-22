@@ -13,4 +13,20 @@ namespace MusicIdentifierAPI.Models
         public string GoogleId { get; set; }
         public UserType UserType { get; set; }
     }
+
+    public class UserChangePassword
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+    }
+
+    public class UserChangeProfile
+    {
+        public int Id { get; set; }
+        public string Username { get; set; }
+        public string Email { get; set; }
+        public string FacebookId { get; set; }
+        public string GoogleId { get; set; }
+        public UserType UserType { get; set; }
+    }
 }

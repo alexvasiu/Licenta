@@ -12,6 +12,7 @@ RUN dotnet restore Licenta.sln
 # Copy everything else and build
 COPY . .
 RUN dotnet publish -c Release -o out MusicIdentifierAPI/MusicIdentifierAPI.csproj
+RUN ls -lahR
 
 # Build runtime image
 FROM microsoft/dotnet:2.2-aspnetcore-runtime

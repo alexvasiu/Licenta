@@ -14,6 +14,8 @@ import { UserService } from './Users/UserService';
 import { User } from './Users/User';
 import NavigationService from '../../NavigationService';
 import { AsyncStorageUtis } from './AsnyStorageUtils';
+import { LoginButton, AccessToken, LoginManager } from 'react-native-fbsdk';
+import { GoogleSignin, GoogleSigninButton } from 'react-native-google-signin';
 
 interface Props {
 }
@@ -111,10 +113,40 @@ States > {
                                 onPress=
                                 {() => { this.redirect("Register") }}>Register</Text>
                         </View>
+                        
 
                         {
                             this.state.loading ? <ActivityIndicator size="large" color="#0000ff" /> : null
                         }
+
+                        <View style={styles.socials}>
+                            <LoginButton
+                                onLoginFinished={
+                                    (error, result) => {
+                                    if (error) {
+                                        console.warn("login has error: " + JSON.stringify(result));
+                                        console.warn("login has error: " + error);
+                                    } else if (result.isCancelled) {
+                                        console.warn("login is cancelled.");
+                                    } else {
+                                        AccessToken.getCurrentAccessToken().then(
+                                            (data1: any) => {
+                                                console.warn(data1)
+                                                console.warn(data1.accessToken.toString())
+                                                // LoginManager.logOut();
+                                            }
+                                        )
+                                    }
+                                    }
+                                }
+                                onLogoutFinished={() => console.warn("logout.")}/>
+                                <GoogleSigninButton
+                                    style={{ width: 192, height: 48, marginTop: 20 }}
+                                    size={GoogleSigninButton.Size.Wide}
+                                    color={GoogleSigninButton.Color.Dark}
+                                    onPress={()=>{}}
+                                    disabled={false} />
+                        </View>
                     </View> }
             </MusicStoreContext.Consumer>
         )
@@ -130,6 +162,13 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
         backgroundColor: '#2c3e50'
+    },
+    socials: {
+        marginTop: 20,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignSelf: 'center'
     },
     input: {
         height: 40,

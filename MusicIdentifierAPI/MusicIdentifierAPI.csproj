@@ -12,6 +12,8 @@
   <ItemGroup>
     <Compile Remove="Migrations\20190608152413_DurationToTimeStamp.cs" />
     <Compile Remove="Migrations\20190608152413_DurationToTimeStamp.Designer.cs" />
+    <Compile Remove="Migrations\20190618174038_changepicture.cs" />
+    <Compile Remove="Migrations\20190618174038_changepicture.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -5,9 +5,12 @@ namespace Music_Extract_Feature
     public class Mp3Sound : ISound
     {
         public SoundType Type { get; } = SoundType.Mp3;
+        public ushort NumChannels { get; set; }
         public List<double> Data { get; set; }
         public List<byte> RawBinary { get; set; }
         public double Duration { get; set; }
+        public ushort BitDepth { get; set; }
+        public uint SampleRate { get; set; }
 
         public double GetChunkSize()
         {

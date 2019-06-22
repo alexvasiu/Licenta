@@ -33,6 +33,46 @@ namespace MusicIdentifierAPI.Controllers
         [HttpPost]
         [AllowAnonymous]
         [Produces("application/json")]
+        [Route("loginFacebook")]
+        public IActionResult LoginInFb([FromBody] UserLoginFacebook userLoginFacebook)
+        {
+            var loginResult = _userService.LoginFb(userLoginFacebook);
+            return loginResult == null ? new BadRequestResult() as IActionResult : new OkObjectResult(loginResult);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Produces("application/json")]
+        [Route("loginGoogle")]
+        public IActionResult LoginInGoogle([FromBody] UserLoginGoogle userLoginGoogle)
+        {
+            var loginResult = _userService.LoginGoogle(userLoginGoogle);
+            return loginResult == null ? new BadRequestResult() as IActionResult : new OkObjectResult(loginResult);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Produces("application/json")]
+        [Route("changePassword")]
+        public IActionResult ChangePassword([FromBody] UserChangePassword userChangePassword)
+        {
+            var loginResult = _userService.ChangePassword(userChangePassword);
+            return !loginResult ? new BadRequestResult() as IActionResult : new OkObjectResult(true);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Produces("application/json")]
+        [Route("changeProfile")]
+        public IActionResult ChangeProfile([FromBody] UserChangeProfile userChangeProfile)
+        {
+            var loginResult = _userService.ChangeProfile(userChangeProfile);
+            return !loginResult ? new BadRequestResult() as IActionResult : new OkObjectResult(true);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Produces("application/json")]
         [Route("refreshToken")]
         public IActionResult Refresh([FromBody] RefreshTokenModel refreshTokenModel)
         {

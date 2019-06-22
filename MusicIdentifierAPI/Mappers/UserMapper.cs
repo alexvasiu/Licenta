@@ -16,6 +16,16 @@ namespace MusicIdentifierAPI.Mappers
             UserType = user.UserType
         };
 
+        public static User MapUserModel(UserModel user) => new User
+        {
+            Id = user.Id,
+            Email = user.Email,
+            Username = user.Username,
+            RefreshToken = user.RefreshToken,
+            FacebookId = user.FacebookId,
+            GoogleId = user.GoogleId,
+            UserType = user.UserType
+        };
 
         public static User MapRegisterModel(UserRegisterModel userRegisterModel) => new User
         {

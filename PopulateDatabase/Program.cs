@@ -54,7 +54,7 @@ namespace PopulateDatabase
                 YoutubeLink = musicItem.YoutubeLink,
                 Genre = musicItem.Genre,
                 Picture = musicItem.PictureFile == "" ? null : 
-                    File.ReadAllBytes(Path.Combine(musicPath, musicItem.PictureFile)).ToList(),
+                    File.ReadAllBytes(Path.Combine(musicPath, musicItem.PictureFile)).ToArray(),
                 Duration = sound.Duration
             };
             songRepo.Add(newSong);
@@ -73,12 +73,42 @@ namespace PopulateDatabase
             unitOfWork.Save();
             unitOfWork.Dispose();
         }
+
+        private static void GenerateJson(string musicPath)
+        {
+            var list = new List<MusicItem>();
+            var genres = new List<string> { "blues", "classical", "country", "disco", "hiphop", "jazz", "metal", "pop", "reggae", "rock" };
+            foreach (var genre in genres)
+            {
+                for (var i = 0; i < 100; i++)
+                {
+                    var filename = $@"genres\{genre}\{genre}.000{(i < 10 ? "0" + i: i.ToString())}.wav";
+                    list.Add(new MusicItem
+                    {
+                        ApparitionDate = DateTime.Now.AddYears(-10),
+                        Artist = "Unknown",
+                        BeatportLink = "",
+                        File = filename,
+                        Genre = genre,
+                        Name = $"{genre}.{i}",
+                        PictureFile = "",
+                        SpotifyLink = "",
+                        YoutubeLink = ""
+                    });
+                }
+            }
+
+            using var file = File.CreateText(Path.Combine(musicPath, "newMusic.json"));
+            var serializer = new JsonSerializer {Formatting = Formatting.Indented};
+            serializer.Serialize(file, list);
+        }   
         
         private static void Main(string[] args)
         {
             var executableLocation = Path.GetDirectoryName(
                 Assembly.GetExecutingAssembly().Location);
             var musicPath = Path.GetFullPath(Path.Combine(executableLocation, @"..\..\..\music"));
+            //GenerateJson(musicPath);
             using var red = new StreamReader(Path.Combine(musicPath, "music.json"));
             var musicItems = JsonConvert.DeserializeObject<List<MusicItem>>(red.ReadToEnd());
             var percent = 0.0;

@@ -149,6 +149,9 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-google-signin')
+    implementation 'com.facebook.android:facebook-android-sdk:5.0.3'
+    implementation project(':react-native-fbsdk')
     implementation project(':react-native-sound')
     implementation project(':react-native-fs')
     implementation project(':react-native-audio-record')

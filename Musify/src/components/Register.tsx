@@ -19,10 +19,10 @@ export class Register extends Component<Props, States> {
     constructor(props: Props) {
         super(props);
         this.state = {
-            username: 'avasiu',
-            email: 'test',
-            password1: 'zanamea',
-            password2: 'zanamea',
+            username: '',
+            email: '',
+            password1: '',
+            password2: '',
             loading: false
         }
     }

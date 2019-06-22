@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using EntityFrameworkCore.Triggers;
-using System.Linq;
 
 namespace MusicIdentifierAPI.Domain
 {
@@ -19,14 +18,13 @@ namespace MusicIdentifierAPI.Domain
         public string SpotifyLink { get; set; }
         public string BeatPortLink { get; set; }
         public double Duration { get; set; }
-        public List<byte> Picture { get; set; }
+        public byte[] Picture { get; set; }
         public List<SongPart> SongParts { get; set; }
         public List<SongPlaylist> Playlists { get; set; }
 
         public Song()
         {
             SongParts = new List<SongPart>();
-            Picture = new List<byte>();
             Playlists = new List<SongPlaylist>();
         }
 
@@ -40,7 +38,7 @@ namespace MusicIdentifierAPI.Domain
                 var finalPath =
                     currentDirectory.Contains("MusicIdentifierAPI")
                         ? "songDict"
-                        : Path.GetFullPath(Path.Combine(currentDirectory, @"..\..\..\..\MusicIdentifierAPI\songDict"));
+                        : Path.GetFullPath(Path.Combine(currentDirectory, @"..\..\..\..\MusicIdentifierAPI\wwwroot\songDict"));
                 var dict =
                     Utils.Utils.ReadFromBinaryFile<SortedDictionary<string, SortedDictionary<int, SongPart>>>(finalPath) ??
                     new SortedDictionary<string, SortedDictionary<int, SongPart>>();

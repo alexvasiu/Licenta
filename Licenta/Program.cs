@@ -8,7 +8,7 @@ namespace Music_Extract_Feature
         private static void Main()
         {
              // const string file = "music\\Afrojack - Unstoppable (Official Video).mp3";
-             const string file = "music\\bells.wav";
+             const string file = @"C:\Users\Ale\Licenta-master\Licenta-master\PopulateDatabase\music\genres\blues\blues.00002.wav";
              var watch = Stopwatch.StartNew();
 
              var sound = SoundReader.ReadFromFile(file);
