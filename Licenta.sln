@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MusicIdentifierAPI", "Music
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PopulateDatabase", "PopulateDatabase\PopulateDatabase.csproj", "{0C15E33A-B739-407E-953E-7ED5BAF5B4D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTesting", "UnitTesting\UnitTesting.csproj", "{4C43C27C-9C3D-420C-8BBE-127981DC3C52}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTesting", "UnitTesting\UnitTesting.csproj", "{4C43C27C-9C3D-420C-8BBE-127981DC3C52}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ANN", "ANN\ANN.csproj", "{7AEA6F4F-96B8-4958-A372-F8FAFBE5488C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{4C43C27C-9C3D-420C-8BBE-127981DC3C52}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C43C27C-9C3D-420C-8BBE-127981DC3C52}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C43C27C-9C3D-420C-8BBE-127981DC3C52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7AEA6F4F-96B8-4958-A372-F8FAFBE5488C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7AEA6F4F-96B8-4958-A372-F8FAFBE5488C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7AEA6F4F-96B8-4958-A372-F8FAFBE5488C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7AEA6F4F-96B8-4958-A372-F8FAFBE5488C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -5,6 +5,7 @@ WORKDIR /MusicIdentifierAPI
 COPY *.sln .
 COPY MusicIdentifierAPI/*.csproj ./MusicIdentifierAPI/
 COPY UnitTesting/*.csproj ./UnitTesting/
+COPY ANN/*.csproj ./ANN/
 COPY Licenta/*.csproj ./Licenta/
 COPY PopulateDatabase/*.csproj ./PopulateDatabase/
 RUN dotnet restore Licenta.sln
@@ -12,7 +13,6 @@ RUN dotnet restore Licenta.sln
 # Copy everything else and build
 COPY . .
 RUN dotnet publish -c Release -o out MusicIdentifierAPI/MusicIdentifierAPI.csproj
-RUN ls -lahR
 
 # Build runtime image
 FROM microsoft/dotnet:2.2-aspnetcore-runtime

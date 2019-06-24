@@ -95,7 +95,7 @@ namespace Music_Extract_Feature
             highScores = highScores.Where((x, index) => x > avg).ToList();
         }
 
-        public static Fft CalculateFft(ISound sound, bool isFromServer = true)
+        public static Fft CalculateFft(ISound sound, bool isFromServer = true, bool keepAll = false)
         {
             var res = new Fft {Result = new List<DataPoint>()};
             if (isFromServer)
@@ -163,18 +163,21 @@ namespace Music_Extract_Feature
                 });
             }
 
-            var avg = highScoresGlobal.Average();
-
-            for (var i = 0; i < res.Result.Count; i++)
+            if (!keepAll)
             {
-                var dataPoint = res.Result[i];
-                var aPoints = dataPoint.Points;
-                var aHighScores = dataPoint.HighScores;
-                Filter(ref aPoints, ref aHighScores, avg);
-                dataPoint.Points = aPoints;
-                dataPoint.HighScores = aHighScores;
-                dataPoint.Hash = Hash(aPoints);
-                res.Result[i] = dataPoint;
+                var avg = highScoresGlobal.Average();
+
+                for (var i = 0; i < res.Result.Count; i++)
+                {
+                    var dataPoint = res.Result[i];
+                    var aPoints = dataPoint.Points;
+                    var aHighScores = dataPoint.HighScores;
+                    Filter(ref aPoints, ref aHighScores, avg);
+                    dataPoint.Points = aPoints;
+                    dataPoint.HighScores = aHighScores;
+                    dataPoint.Hash = Hash(aPoints);
+                    res.Result[i] = dataPoint;
+                }
             }
 
             return res;
