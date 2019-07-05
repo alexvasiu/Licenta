@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { MusicStoreContext } from '../Context/Context';
-import { View, StyleSheet, Text, Image, Modal } from 'react-native';
+import { View, StyleSheet, Text, Image, Modal, ActivityIndicator, Dimensions } from 'react-native';
 import AudioRecord from 'react-native-audio-record';
 import Permissions from 'react-native-permissions';
 import { SongService } from './SongService';
@@ -8,6 +8,11 @@ import { Song } from './Song';
 import {Buffer} from 'buffer';
 import { Card, Button, Icon } from 'react-native-elements';
 import { SongInfo } from './SongInfo';
+import { AddToPlaylist } from './AddToPlaylist';
+
+import {
+    PieChart
+  } from 'react-native-chart-kit'
 
 interface Props {
     navigation: any;
@@ -21,6 +26,8 @@ interface States {
     buttonEnabled: boolean;
     displaySong: boolean;
     modalVisible: boolean;
+    loadedClassify: boolean;
+    classifyData: any[];
 }
 
 export class MainView extends Component<Props, States> {
@@ -33,7 +40,9 @@ export class MainView extends Component<Props, States> {
             foundedSong: undefined,
             buttonEnabled: true,
             displaySong: false,
-            modalVisible: false
+            modalVisible: false,
+            loadedClassify: true,
+            classifyData: []
         }
     }
 
@@ -70,6 +79,15 @@ export class MainView extends Component<Props, States> {
             p = await Permissions.request(x);
     };
 
+    getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+      }
+
     render() {
         return (
             <MusicStoreContext.Consumer>
@@ -84,9 +102,46 @@ export class MainView extends Component<Props, States> {
                                      ?
                                      <React.Fragment>
                                         <Text style={{fontSize: 30, color: 'red'}}>No results found</Text>
-                                        <Button title="Classify Song" onPress={() => {
-
-                                        }}/>
+                                        {
+                                            this.state.classifyData.length == 0 && this.state.loadedClassify ? 
+                                            <Button title="Classify Song" onPress={() => {
+                                                this.setState({loadedClassify: false, classifyData: []}, () => {
+                                                    SongService.clasifySongData(this.state.audioTempFile, data.user.token)
+                                                    .then((data: any[]) => {
+                                                        console.warn(data)
+                                                        this.setState({loadedClassify: true, classifyData: data.map(x => {
+                                                            return {
+                                                                name: x.item1,
+                                                                test: x.item2,
+                                                                legendFontSize: 15,
+                                                                color: this.getRandomColor()
+                                                            }
+                                                        })})
+                                                    })
+                                                })
+                                            }}/>
+                                            :
+                                            ! this.state.loadedClassify ? 
+                                                <ActivityIndicator size='large' />
+                                            : this.state.classifyData.length == 10 ?
+                                            <React.Fragment>
+                                                <PieChart
+                                                    data={this.state.classifyData}
+                                                    width={Dimensions.get('window').width}
+                                                    height={220}
+                                                    backgroundColor="transparent"
+                                                    paddingLeft="15"
+                                                    accessor="test"
+                                                    chartConfig={{
+                                                        backgroundGradientFrom: '#1E2923',
+                                                        backgroundGradientTo: '#08130D',
+                                                        color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
+                                                        strokeWidth: 2 // optional, default 3
+                                                    }}
+                                                />
+                                            </React.Fragment> : null
+                                        }
+                                       
                                      </React.Fragment> :
                                 <Card
                                     containerStyle = {{width: '95%'}}
@@ -122,7 +177,7 @@ export class MainView extends Component<Props, States> {
                                         let curr = this.state.currState;
                                         this.setState({currState: (curr + 1) % 3, gifState: curr == 0 ? 1 : curr == 1 ? 0 : 2, buttonEnabled: curr != 2}, async () => {
                                             if (curr == 0)
-                                            this.setState({audioTempFile: '', displaySong: false}, AudioRecord.start());
+                                            this.setState({loadedClassify: true, classifyData: [], audioTempFile: '', displaySong: false}, AudioRecord.start());
                                             else if (curr == 1)
                                                 this.setState({audioTempFile: await AudioRecord.stop()});
                                             else {
@@ -150,7 +205,10 @@ export class MainView extends Component<Props, States> {
                             <View style={{marginTop: 22}}>
                                 <View>
                                     {this.state.foundedSong != undefined ?
-                                        <SongInfo song={this.state.foundedSong} /> 
+                                       <React.Fragment>
+                                            <SongInfo song={this.state.foundedSong} /> 
+                                            <AddToPlaylist songId={this.state.foundedSong.id} />
+                                       </React.Fragment>
                                     : null}
                                 </View>
                             </View>

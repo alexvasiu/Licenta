@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using EntityFrameworkCore.Triggers;
 
@@ -18,7 +19,8 @@ namespace MusicIdentifierAPI.Domain
         public string SpotifyLink { get; set; }
         public string BeatPortLink { get; set; }
         public double Duration { get; set; }
-        public byte[] Picture { get; set; }
+        [Column(TypeName = "bytea")]
+        public Byte[] Picture { get; set; }
         public List<SongPart> SongParts { get; set; }
         public List<SongPlaylist> Playlists { get; set; }
 

@@ -59,7 +59,8 @@ namespace MusicIdentifierAPI.Migrations
 
                     b.Property<string>("Name");
 
-                    b.Property<byte[]>("Picture");
+                    b.Property<byte[]>("Picture")
+                        .HasColumnType("bytea");
 
                     b.Property<string>("SpotifyLink");
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using ANN;
 using Hangfire;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +21,9 @@ namespace MusicIdentifierAPI.Services
         SongInfoModel AnalyzeAudioFile(byte[] data, string rootPath);
         PlaylistModel AddPlaylist(PlaylistModel playlistModel);
         bool AddSongToPlaylist(SongInPlaylist songInPlaylist);
+        List<PlaylistModel> GetPlaylists(int songId, int userId);
+        List<(string, double)> ClasifySong(byte[] data, string rootPath);
+        List<SongInfoModel> GetSongsFromPlaylist(int playlistId);
     }
     public class SongService : ISongService
     {
@@ -44,21 +48,6 @@ namespace MusicIdentifierAPI.Services
             if (dict == null)
                 throw new Exception("Dictionary file not found");
 
-            /*if (dict == null)
-            {
-                var songPartRepo = unitOfWork.GetRepository<SongPart>();
-                var dict = new SortedDictionary<string, SortedDictionary<int, SongPart>>();
-                foreach (var songPart in songPartRepo.GetAll())
-                {
-                    if (songPart.Hashtag == "0") continue;
-                    if (dict.ContainsKey(songPart.Hashtag))
-                        dict[songPart.Hashtag].Add(songPart.Id, songPart);
-                    else
-                        dict[songPart.Hashtag] = new SortedDictionary<int, SongPart> { { songPart.Id, songPart } };
-                }
-                // Utils.Utils.WriteToBinaryFile("songDict", dict);
-            //}*/
-
             var sound = SoundReader.ReadFromData(data, SoundType.Wav);
             var resultFft = Fft.CalculateFft(sound, false);
 
@@ -81,7 +70,7 @@ namespace MusicIdentifierAPI.Services
                                               Math.Abs(Math.Abs(resultFft.Result[i1].Time -
                                                                 resultFft.Result[i2].Time) -
                                                        Math.Abs(value.Time - x.Value.Time)) <
-                                              0.0001)) continue;
+                                              0.001)) continue;
                     var song = songRepo.Find(value.SongId);
                     song.IdentificationCounter += 1;
                     songRepo.Update(song);
@@ -97,23 +86,10 @@ namespace MusicIdentifierAPI.Services
         {
             using var unitOfWork = new UnitOfWork();
             var playlistRepo = unitOfWork.GetRepository<Playlist>();
-            var playlist = new Playlist
-            {
-                UserId = playlistModel.UserId,
-                Name = playlistModel.Name,
-                Public = playlistModel.Public,
-                ShareLink = playlistModel.ShareLink
-            };
+            var playlist = PlaylistMapper.MapPlaylist(playlistModel);
             playlistRepo.Add(playlist);
 
-            return new PlaylistModel
-            {
-                UserId = playlistModel.UserId,
-                Name = playlistModel.Name,
-                Public = playlistModel.Public,
-                ShareLink = playlistModel.ShareLink,
-                Id = playlistModel.Id
-            };
+            return PlaylistMapper.MapPlaylist(playlist);
         }
 
         public bool AddSongToPlaylist(SongInPlaylist songInPlaylist)
@@ -129,6 +105,54 @@ namespace MusicIdentifierAPI.Services
 
             unitOfWork.Save();
             return true;
+        }
+
+        public List<PlaylistModel> GetPlaylists(int songId, int userId)
+        {
+            using var unitOfWork = new UnitOfWork();
+            var playlistRepo = unitOfWork.GetRepository<Playlist>();
+            var playlistSongRepo = unitOfWork.GetRepository<SongPlaylist>();
+
+            var founded = playlistSongRepo.GetAll().Where(x => x.SongId == songId).Select(x => x.PlaylistId);
+
+            return playlistRepo.GetAll().Where(x => x.UserId == userId && !founded.Contains(x.Id)).Select(x => PlaylistMapper.MapPlaylist(x)).ToList();
+        }
+
+        public List<(string, double)> ClasifySong(byte[] data, string rootPath)
+        {
+            var netFilePath = Path.Combine(rootPath, "net");
+
+            var ann = new RNA(null, AnnMode.Training, ActivationFunctions.Tahn);
+            var net = ANN.Utils.ReadFromBinaryFile<List<List<Neuron>>>(netFilePath);
+
+            var sound2 = SoundReader.ReadFromData(data, SoundType.Wav);
+            var result2 = Fft.CalculateFft(sound2, keepAll: true);
+
+            ann.TestData = result2.Result.Select(x => (x.HighScores, "x")).ToList();
+            ann.TestData.Shuffle();
+
+            var computedOutputs = ann.Evaluate(ref net, 10);
+
+            var genres = ann.GetGeneres();
+            foreach (var result in computedOutputs)
+                genres[ann.GetValueFromLabelVector(result)] += 1;
+
+            var res = new List<(string, double)>();
+            foreach (var (key, value) in genres)
+                res.Add((key, value * 100.0 / computedOutputs.Count));
+
+            return res;
+        }
+
+        public List<SongInfoModel> GetSongsFromPlaylist(int playlistId)
+        {
+            using var unitOfWork = new UnitOfWork();
+            var songRepo = unitOfWork.GetRepository<Song>();
+            var songPlaylistRepo = unitOfWork.GetRepository<SongPlaylist>();
+
+            return songPlaylistRepo.GetAll().Where(x => x.PlaylistId == playlistId)
+                .Select(x => SongMapper.MapSong(songRepo.Find(x.SongId))).ToList();
+
         }
     }
 }

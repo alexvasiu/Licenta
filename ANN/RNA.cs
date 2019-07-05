@@ -34,15 +34,19 @@ namespace ANN
             else if (_activationFunction == ActivationFunctions.Tahn)
                 _activationFunctionInverse = ActivationFunctions.InverseTahn;
 
+            var random = new Random();
+
             if (mode == AnnMode.Training)
-                _traningData = data;
+                _traningData = data?.Where(x => random.NextDouble() < 0.8).ToList();
             else
             {
                 data.Shuffle();
                 var stop = (int) (data.Count * 0.8);
-                _traningData = data.Take(stop).ToList();
+                _traningData = data; // data.Take(stop).ToList();
                 TestData = data.Skip(stop).ToList();
             }
+
+            _traningData?.Shuffle();
         }
 
         private List<double> GenerateList(int length)
@@ -77,7 +81,7 @@ namespace ANN
             return new List<List<Neuron>> {hiddenLayer, outputLayer};
         }
 
-        private double Activate(IEnumerable<double> inputs, IReadOnlyList<double> weights)
+        private static double Activate(IEnumerable<double> inputs, IReadOnlyList<double> weights)
         {
             return inputs.Select((t, i) => t * weights[i]).Sum() + weights.Last();
         }
@@ -190,7 +194,24 @@ namespace ANN
             return computedOutputs;
         }
 
-        private string GetValueFromLabelVector(IReadOnlyList<double> value)
+        public List<string> Evaluate(ref List<List<Neuron>> net, int noOutputs, List<List<double>> testData)
+        {
+            var computedOutputs = new List<List<double>>();
+            foreach (var data in testData)
+            {
+                var computedOutput = ForwardPropagation(data, ref net);
+                var computedLabels = Enumerable.Repeat(0.0, noOutputs).ToList();
+                computedLabels[computedOutput.IndexOf(computedOutput.Max())] = 1;
+                computedOutput = computedLabels;
+                computedOutputs.Add(computedOutput);
+            }
+
+            return computedOutputs.Select(x => GetValueFromLabelVector(x)).ToList();
+        }
+
+        public Dictionary<string, int> GetGeneres() => _genres.ToDictionary(x => x, x => 0);
+
+        public string GetValueFromLabelVector(List<double> value)
         {
             for (var i = 0; i < value.Count; i++)
                 if ((int) value[i] == 1)

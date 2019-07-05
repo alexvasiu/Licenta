@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using ANN;
 using Music_Extract_Feature;
 using MusicIdentifierAPI.Domain;
 using MusicIdentifierAPI.Repository;
@@ -80,7 +81,7 @@ namespace PopulateDatabase
             var genres = new List<string> { "blues", "classical", "country", "disco", "hiphop", "jazz", "metal", "pop", "reggae", "rock" };
             foreach (var genre in genres)
             {
-                for (var i = 0; i < 100; i++)
+                for (var i = 0; i < /*100*/ 2; i++)
                 {
                     var filename = $@"genres\{genre}\{genre}.000{(i < 10 ? "0" + i: i.ToString())}.wav";
                     list.Add(new MusicItem
@@ -108,7 +109,7 @@ namespace PopulateDatabase
             var executableLocation = Path.GetDirectoryName(
                 Assembly.GetExecutingAssembly().Location);
             var musicPath = Path.GetFullPath(Path.Combine(executableLocation, @"..\..\..\music"));
-            //GenerateJson(musicPath);
+            // GenerateJson(musicPath);
             using var red = new StreamReader(Path.Combine(musicPath, "music.json"));
             var musicItems = JsonConvert.DeserializeObject<List<MusicItem>>(red.ReadToEnd());
             var percent = 0.0;
@@ -122,21 +123,24 @@ namespace PopulateDatabase
                 Console.WriteLine($"Progress: {percent}%");
             }
 
-            /*Console.WriteLine("Creating dictionary ...");
+            /*Console.WriteLine("Create RNA File ...");
             using var unitOfWork = new UnitOfWork();
+            var songRepo = unitOfWork.GetRepository<Song>();
             var songPartsRepo = unitOfWork.GetRepository<SongPart>();
-            var allParts = songPartsRepo.GetAll();
 
-            var dict = new SortedDictionary<string, SortedList<double, SongPart>>();
-            foreach (var songPart in allParts)
+            var data = new List<(List<double>, string)>();
+            foreach (var songPart in songPartsRepo.GetAll())
             {
-                if (dict.ContainsKey(songPart.Hashtag))
-                    dict[songPart.Hashtag].Add(songPart.Time, songPart);
-                else
-                    dict[songPart.Hashtag] = new SortedList<double, SongPart> { { songPart.Time, songPart } };
+                var song = songRepo.Find(songPart.SongId);
+                data.Add((songPart.HighScores, song.Genre));
             }
 
-            MusicIdentifierAPI.Utils.Utils.WriteToBinaryFile(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\..\MusicIdentifierAPI\songdict"), dict);*/
+            var ann = new RNA(data, AnnMode.Training, ActivationFunctions.Tahn);
+            var net = ann.NetInit(10, 9);
+            ann.Training(ref net, 10, 0.001, 1000);
+
+            //MusicIdentifierAPI.Utils.Utils.WriteToBinaryFile("ann", ann);
+            MusicIdentifierAPI.Utils.Utils.WriteToBinaryFile("net", net);*/
 
             Console.WriteLine("Done :)");
             Console.ReadKey();

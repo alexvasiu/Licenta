@@ -2,6 +2,7 @@ import React from "react";
 import { MusicStoreContext } from "./Context";
 import NetInfo from "@react-native-community/netinfo";
 import { AsyncStorageUtis } from "../AsnyStorageUtils";
+import { User } from "react-native-google-signin";
 
 interface Props {
 }
@@ -59,11 +60,22 @@ export class AppProvider extends React.Component<Props, States> {
     }
 
     render() {
+        let me : any = this;
         let data = {
             user: this.state.user,
             network: this.state.network,
             serverConnection: this.state.serverConnection,
             logout: () => {this.logout()},
+            changeProfile: function (user: User) : Promise<any> {
+                return new Promise<any>((resolve, reject) => {
+                    if (me.state.user)
+                    {
+                        AsyncStorageUtis.setItem("user", JSON.stringify(user)).then(() => {
+                            me.setState({user}, () => resolve())
+                        })
+                    }
+                })
+            },
             login: (user: any) => {this.setState({user: user})}
         };
         return (<MusicStoreContext.Provider value={data as any}>

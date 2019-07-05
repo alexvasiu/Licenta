@@ -17,17 +17,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="EntityFrameworkCore.Triggers" Version="1.1.1" />
-    <PackageReference Include="Hangfire.Core" Version="1.7.3" />
+    <PackageReference Include="EntityFrameworkCore.Triggers" Version="1.2.0" />
+    <PackageReference Include="Hangfire.Core" Version="1.7.4" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
+    <PackageReference Include="Npgsql" Version="4.0.7" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.2.4" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ANN\ANN.csproj" />
     <ProjectReference Include="..\Licenta\Feature Extraction.csproj" />
   </ItemGroup>
 

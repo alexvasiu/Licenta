@@ -46,6 +46,7 @@ namespace MusicIdentifierAPI.Services
                     GoogleId = null,
                     UserType = UserType.Normal,
                     Username = userLoginFacebook.Email,
+                    RefreshToken = GenerateRefreshToken(),
                     Password = StringCipher.Encrypt("", "KI6rnfCy6YUFq0mLoO")
                 };
                 userRepo.Add(user);
@@ -87,10 +88,11 @@ namespace MusicIdentifierAPI.Services
                 user = new User
                 {
                     Email = userLoginGoogle.Email,
-                    FacebookId = userLoginGoogle.GoogleId,
-                    GoogleId = null,
+                    GoogleId = userLoginGoogle.GoogleId,
+                    FacebookId = null,
                     UserType = UserType.Normal,
                     Username = userLoginGoogle.Email,
+                    RefreshToken = GenerateRefreshToken(),
                     Password = StringCipher.Encrypt("", "KI6rnfCy6YUFq0mLoO")
                 };
                 userRepo.Add(user);
@@ -130,7 +132,7 @@ namespace MusicIdentifierAPI.Services
                 x.Username == userChangePassword.Username);
             if (user == null)
                 return false;
-            user.Password = userChangePassword.Password;
+            user.Password = StringCipher.Encrypt(userChangePassword.Password, "KI6rnfCy6YUFq0mLoO");
             userRepo.Update(user);
             unitOfWork.Save();
             return true;

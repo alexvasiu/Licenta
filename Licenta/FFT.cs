@@ -159,7 +159,7 @@ namespace Music_Extract_Feature
                     Points = points,
                     Time = timeForChunk * i,
                     Duration = timeForChunk,
-                    HighScores = highScores
+                    HighScores = !keepAll ? highScores : points.Select(x => (double) x).ToList()
                 });
             }
 
@@ -173,8 +173,8 @@ namespace Music_Extract_Feature
                     var aPoints = dataPoint.Points;
                     var aHighScores = dataPoint.HighScores;
                     Filter(ref aPoints, ref aHighScores, avg);
+                    dataPoint.HighScores = dataPoint.Points.Select(x => (double) x).ToList();
                     dataPoint.Points = aPoints;
-                    dataPoint.HighScores = aHighScores;
                     dataPoint.Hash = Hash(aPoints);
                     res.Result[i] = dataPoint;
                 }
@@ -182,10 +182,6 @@ namespace Music_Extract_Feature
 
             return res;
         }
-
-        // TODO: ASSURE THAT MP3 IS PARSED CORRECTLY
-
-        // TODO: UI: Login
 
         private static Complex[] CalculateFft(IReadOnlyList<Complex> data)
         {

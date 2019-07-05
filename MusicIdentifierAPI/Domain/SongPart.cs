@@ -14,26 +14,5 @@ namespace MusicIdentifierAPI.Domain
         public double Duration { get; set; }
         public List<double> HighScores { get; set; }
         public List<int> Points { get; set; }
-
-        static SongPart()
-        {
-            /*Triggers<SongPart>.Inserted += songPartObj =>
-            {
-                var currentDirectory = Directory.GetCurrentDirectory();
-                var finalPath =
-                    currentDirectory.Contains("MusicIdentifierAPI")
-                        ? "songDict"
-                        : Path.Combine(currentDirectory, @"..\..\..\..\MusicIdentifierAPI\songDict");
-                var dict =
-                    Utils.Utils.ReadFromBinaryFile<SortedDictionary<string, SortedList<double, SongPart>>>(finalPath) ??
-                    new SortedDictionary<string, SortedList<double, SongPart>>();
-                var songPart = songPartObj.Entity;
-                if (dict.ContainsKey(songPart.Hashtag))
-                    dict[songPart.Hashtag].Add(songPart.Time, songPart);
-                else
-                    dict[songPart.Hashtag] = new SortedList<double, SongPart> { { songPart.Time, songPart } };
-                Utils.Utils.WriteToBinaryFile(finalPath, dict);
-            };*/
-        }
     };
 }

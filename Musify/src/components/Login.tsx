@@ -15,7 +15,7 @@ import { User } from './Users/User';
 import NavigationService from '../../NavigationService';
 import { AsyncStorageUtis } from './AsnyStorageUtils';
 import { LoginButton, AccessToken, LoginManager } from 'react-native-fbsdk';
-import { GoogleSignin, GoogleSigninButton } from 'react-native-google-signin';
+import { GoogleSignin, GoogleSigninButton, statusCodes } from 'react-native-google-signin';
 
 interface Props {
 }
@@ -41,7 +41,15 @@ States > {
     
     componentDidMount()
     {
-        
+        GoogleSignin.configure({
+            scopes: ['https://www.googleapis.com/auth/drive.readonly'], // what API you want to access on behalf of the user, default is email and profile
+            webClientId: '389641282720-bdhmm8ko1kk1n85t0gkufm6aut0brjtc.apps.googleusercontent.com', // client ID of type WEB for your server (needed to verify user ID and offline access)
+            offlineAccess: true, // if you want to access Google API on behalf of the user FROM YOUR SERVER
+            hostedDomain: '', // specifies a hosted domain restriction
+            loginHint: '', // [iOS] The user's ID, or email address, to be prefilled in the authentication UI if possible. [See docs here](https://developers.google.com/identity/sign-in/ios/api/interface_g_i_d_sign_in.html#a0a68c7504c31ab0b728432565f6e33fd)
+            forceConsentPrompt: true, // [Android] if you want to show the authorization prompt at each login.
+            accountName: '', // [Android] specifies an account name on the device that should be used
+        });
     }
 
     redirect(path: string) {
@@ -121,22 +129,21 @@ States > {
 
                         <View style={styles.socials}>
                             <LoginButton
+                                readPermissions={['email']}
                                 onLoginFinished={
                                     (error, result) => {
-                                    if (error) {
-                                        console.warn("login has error: " + JSON.stringify(result));
-                                        console.warn("login has error: " + error);
-                                    } else if (result.isCancelled) {
-                                        console.warn("login is cancelled.");
-                                    } else {
-                                        AccessToken.getCurrentAccessToken().then(
-                                            (data1: any) => {
-                                                console.warn(data1)
-                                                console.warn(data1.accessToken.toString())
-                                                // LoginManager.logOut();
-                                            }
-                                        )
-                                    }
+                                        if (error)
+                                            ToastAndroid.show("Something went wrong", ToastAndroid.LONG);
+                                        else if (result.isCancelled) {
+                                            //ToastAndroid.show("Something went wrong", ToastAndroid.LONG);
+                                        } else {
+                                            AccessToken.getCurrentAccessToken().then(
+                                                (data1: any) => {
+                                                    this.initUser(data1.accessToken.toString())
+                                                    LoginManager.logOut();
+                                                }
+                                            )
+                                        }
                                     }
                                 }
                                 onLogoutFinished={() => console.warn("logout.")}/>
@@ -144,12 +151,69 @@ States > {
                                     style={{ width: 192, height: 48, marginTop: 20 }}
                                     size={GoogleSigninButton.Size.Wide}
                                     color={GoogleSigninButton.Color.Dark}
-                                    onPress={()=>{}}
+                                    onPress={this.signIn}
                                     disabled={false} />
                         </View>
                     </View> }
             </MusicStoreContext.Consumer>
         )
+    }
+
+    signIn = async () => {
+        try {
+            await GoogleSignin.hasPlayServices();
+            const userInfo = await GoogleSignin.signIn();
+            let userGoogle = {
+                googleId: userInfo.user.id,
+                email: userInfo.user.email
+            };
+
+            UserService.loginGoogle(userGoogle).then((user: User) => {
+                this.context.login(user);
+                AsyncStorageUtis.setItem('user', JSON.stringify(user)).then(() => {
+                    this.setState({loading: false})
+                    this.redirect('MainApp');
+                })
+            }, () => {
+                this.setState({loading: false})
+                ToastAndroid.show("Wrong Username/Password", ToastAndroid.LONG);
+            })
+
+        } catch (error) {
+          if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+            // ToastAndroid.show("Something went wrong", ToastAndroid.LONG);
+          } else if (error.code === statusCodes.IN_PROGRESS) {
+            ToastAndroid.show("Something went wrong", ToastAndroid.LONG);
+          } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+            ToastAndroid.show("Something went wrong", ToastAndroid.LONG);
+          } else {
+            ToastAndroid.show("Something went wrong", ToastAndroid.LONG);
+          }
+        }
+      };
+
+    initUser(token: string) {
+        fetch('https://graph.facebook.com/v3.3/me?fields=email,name&access_token=' + token)
+        .then((response) => response.json())
+        .then((json) => {
+            let fbUser = {
+                facebookId: json.id,
+                email: json.email
+            };
+            UserService.loginFacebook(fbUser).then((user: User) => {
+                this.context.login(user);
+                AsyncStorageUtis.setItem('user', JSON.stringify(user)).then(() => {
+                    this.setState({loading: false})
+                    this.redirect('MainApp');
+                })
+            }, () => {
+                this.setState({loading: false})
+                ToastAndroid.show("Wrong Username/Password", ToastAndroid.LONG);
+            })
+        })
+        .catch(() => {
+            ToastAndroid.show("Something went wrong", ToastAndroid.LONG);
+        })
     }
 }
 

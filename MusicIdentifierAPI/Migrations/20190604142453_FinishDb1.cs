@@ -44,7 +44,7 @@ namespace MusicIdentifierAPI.Migrations
                     YoutubeLink = table.Column<string>(nullable: true),
                     SpotifyLink = table.Column<string>(nullable: true),
                     Duration = table.Column<int>(nullable: false),
-                    Picture = table.Column<byte[]>(nullable: true)
+                    Picture = table.Column<Byte[]>(nullable: true)
                 },
                 constraints: table =>
                 {

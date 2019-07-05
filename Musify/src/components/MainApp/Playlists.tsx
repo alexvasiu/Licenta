@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
-import { View, FlatList, StyleSheet, Text, Button, TouchableOpacity, Modal, TouchableHighlight} from 'react-native';
+import { View, FlatList, StyleSheet, Text, Button, TouchableOpacity, Modal, TouchableHighlight, ActivityIndicator} from 'react-native';
 import { Playlist } from './Playlist';
 import { MusicStoreContext } from '../Context/Context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { Song } from './Song';
 import { SongInfo } from './SongInfo';
+import { SongService } from './SongService';
 
 interface Props {
     navigation: any;
@@ -17,6 +18,8 @@ interface States {
     showSongs: boolean;
     modalVisible: boolean;
     index: number;
+    loaded: boolean;
+    playlistName: string;
 }
 
 export class Playlists extends Component<Props, States> {
@@ -24,60 +27,30 @@ export class Playlists extends Component<Props, States> {
     constructor(props: Props) {
         super(props);
         this.state = {
-            playlists: [
-                {
-                    id: 1,
-                    name: 'Liked songs',
-                    userId: 1,
-                    public: false,
-                    shareLink: ""
-                },
-                {
-                    id: 2,
-                    name: 'My Summer Playlist',
-                    userId: 1,
-                    public: true,
-                    shareLink: ""
-                }
-            ],
+            playlists: [],
             showSongs: false,
-            songs: [
-                {
-                    id: 1,
-                    name: 'Song 1',
-                    artist: 'Artist 1',
-                    genre: 'Genre 1',
-                    apparitionDate: new Date(),
-                    identificationCounter : 4,
-                    youtubeLink: '',
-                    spotifyLink: '',
-                    beatPortLink: '',
-                    duration : 2.45,
-                    picture: []
-                },
-                {
-                    id: 2,
-                    name: 'Song 2',
-                    artist: 'Artist 2',
-                    genre: 'Genre 1',
-                    apparitionDate: new Date(),
-                    identificationCounter : 1,
-                    youtubeLink: '',
-                    spotifyLink: '',
-                    beatPortLink: '',
-                    duration : 2.75,
-                    picture: []
-                }
-            ],
+            songs: [],
             modalVisible: false,
-            index: -1
+            index: -1,
+            loaded: false,
+            playlistName: ''
         }
+    }
+
+    componentDidMount()
+    {
+        console.warn(this.context.user)
+        SongService.getPlaylists(-1, this.context.user.id, this.context.user.token)
+        .then((playlists: Playlist[]) => {
+            this.setState({playlists, loaded: true})
+        })
     }
 
     handleMore() 
     {
 
     }
+
     renderSong(song: Song, index: number) {
         return (
             <View style={styles.card} key={song.id}>
@@ -173,7 +146,10 @@ export class Playlists extends Component<Props, States> {
                         }}/>
 
                         <TouchableOpacity onPress={() => {
-                            this.setState({showSongs: true})
+                            SongService.getSongsFromPlaylist(playlist.id, this.context.user.token)
+                            .then((songs: Song[]) => {
+                                this.setState({songs, showSongs: true, playlistName: playlist.name})
+                            })
                         }} style={{
                             flex: 0.3
                         }}>
@@ -196,47 +172,56 @@ export class Playlists extends Component<Props, States> {
 
     render() 
     {
-        return (<View>
-            {this.state.showSongs ? 
+        return (
             <React.Fragment>
-                 <Modal
-                    animationType="slide"
-                    transparent={false}
-                    visible={this.state.modalVisible}
-                    onRequestClose={() => {
-                        this.setState({index: -1, modalVisible: false})
-                    }}>
-                    <View style={{marginTop: 22}}>
-                        <View>
-                            <SongInfo song={this.state.songs[this.state.index]} />
+            {!this.state.loaded ? 
+            <ActivityIndicator size='large' /> :
+                <View>
+                {this.state.showSongs ? 
+                <React.Fragment>
+                    <Modal
+                        animationType="slide"
+                        transparent={false}
+                        visible={this.state.modalVisible}
+                        onRequestClose={() => {
+                            this.setState({index: -1, modalVisible: false})
+                        }}>
+                        <View style={{marginTop: 22}}>
+                            <View>
+                                <SongInfo song={this.state.songs[this.state.index]} />
+                            </View>
                         </View>
-                    </View>
-                </Modal>
-                <Text style={{...styles.title, 
-                    alignContent: 'center',
-                    justifyContent:'center'
-                    }}>
-                    My Summer Playlist
-                </Text>
+                    </Modal>
+                    <Text style={{...styles.title, 
+                        alignContent: 'center',
+                        justifyContent:'center'
+                        }}>
+                        {this.state.playlistName}
+                    </Text>
+                    <FlatList style={styles.allCards}
+                    data={this.state.songs}
+                    renderItem={({item, index}) => this.renderSong(item, index)}
+                    keyExtractor={(_, index) => index.toString()}
+                    onEndReached={this.handleMore}
+                    onEndReachedThreshold={0.1} />
+                <Button title="Back to playlists" onPress={() => {
+                    this.setState({showSongs: false})
+                }} />
+                </React.Fragment>
+                :
                 <FlatList style={styles.allCards}
-                data={this.state.songs}
-                renderItem={({item, index}) => this.renderSong(item, index)}
+                data={this.state.playlists}
+                renderItem={({item, index}) => this.renderItem(item, index)}
                 keyExtractor={(_, index) => index.toString()}
                 onEndReached={this.handleMore}
-                onEndReachedThreshold={0.1} />
-            <Button title="Back to playlists" onPress={() => {
-                this.setState({showSongs: false})
-            }} />
-            </React.Fragment>
-            :
-              <FlatList style={styles.allCards}
-              data={this.state.playlists}
-              renderItem={({item, index}) => this.renderItem(item, index)}
-              keyExtractor={(_, index) => index.toString()}
-              onEndReached={this.handleMore}
-              onEndReachedThreshold={0.1}
-      />}
-        </View>)
+                onEndReachedThreshold={0.1}
+                />}
+            </View>
+            }
+        </React.Fragment>
+
+        
+        )
     }
 }
 

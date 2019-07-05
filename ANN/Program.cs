@@ -10,7 +10,7 @@ namespace ANN
         private static List<string> Genres = new List<string> { "blues", "classical", "country", "disco", "hiphop", "jazz", "metal", "pop", "reggae", "rock" };
         private static void Main(string[] args)
         {
-            var files = new List<string>();
+            /*var files = new List<string>();
             var data = new List<(List<double>, string)>();
             var percent = 0.0;
             Console.WriteLine($"Percent: {percent * 100}%");
@@ -25,17 +25,38 @@ namespace ANN
                         data.Add((res.Points.Select(x => (double)x).ToList(), genre));
                     percent += 1.0 / 50;
                     Console.Clear();
+
                     Console.WriteLine($"Percent: {percent * 100}%");
                 }
-            }
+            }*/
 
-            var ann = new RNA(data, AnnMode.Testing, ActivationFunctions.Tahn);
-            var net = ann.NetInit(10, 9);
-            ann.Training(ref net, 10, 0.001, 100);
-            var realOutputs = ann.TestData.Select(x => x.Item2).ToList();
+            var ann = new RNA(null, AnnMode.Training, ActivationFunctions.Tahn);
+            var net = Utils.ReadFromBinaryFile<List<List<Neuron>>>("net");
+
+            //var net = ann.NetInit(10, 9);
+            //ann.Training(ref net, 10, 0.001, 1000);
+
+            var sound2 = SoundReader.ReadFromFile(
+                @"C:\Users\Ale\Licenta-master\Licenta-master\PopulateDatabase\music\genres\disco\disco.00001.wav");
+
+            var result2 = Fft.CalculateFft(sound2, keepAll: true);
+        
+
+            //var realOutputs = ann.TestData.Select(x => x.Item2).ToList();
+            ann.TestData = result2.Result.Select(x => (x.HighScores, "disco")).ToList();
+            ann.TestData.Shuffle();
+
             var computedOutputs = ann.Evaluate(ref net, 10);
 
-            Console.Write(ann.ComputePerformance(computedOutputs, realOutputs));
+            var genres = ann.GetGeneres();
+            foreach (var result in computedOutputs)
+                genres[ann.GetValueFromLabelVector(result)] += 1;
+
+            var s = genres.ToDictionary(x => x.Key, x => x.Value * 100.0 / computedOutputs.Count);
+            //Console.Write(ann.ComputePerformance(computedOutputs, realOutputs));
+
+
+            Utils.WriteToBinaryFile("net", net);
 
             Console.ReadKey();
         }
